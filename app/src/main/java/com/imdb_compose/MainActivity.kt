@@ -20,10 +20,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             Imdb_composeTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    Homescreen()
                 }
             }
         }
@@ -31,17 +28,6 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    Imdb_composeTheme {
-        Greeting("Android")
-    }
+fun Homescreen() {
+    Text(text = "foobar")
 }
