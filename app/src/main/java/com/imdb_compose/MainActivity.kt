@@ -50,10 +50,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat.Action
+import androidx.navigation.NavController
+import androidx.navigation.NavHost
+import androidx.navigation.Navigation
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.imdb_compose.ui.theme.Imdb_composeTheme
+import kotlinx.serialization.Serializable
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +70,17 @@ class MainActivity : ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    HomeScreen(top = { TopBar() }, bottom = { BottomBar() })
+                    val navController = rememberNavController()
+
+                    NavHost(navController = navController, startDestination = Navigator.HomeScreen ) {
+                        composable<Navigator.HomeScreen> {
+                            HomeScreen(top = { TopBar() }, bottom = { BottomBar() }, navController = navController)
+                        }
+                        composable<Navigator.CategoryPage> {
+                            val args =  it.toRoute<Navigator.CategoryPage>()
+                            CategoryPage(args.id, args.catagory)
+                        }
+                    }
                 }
             }
         }
@@ -74,7 +91,8 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun HomeScreen(
     top: @Composable () -> Unit,
-    bottom: @Composable () -> Unit
+    bottom: @Composable () -> Unit,
+    navController: NavController
 ) {
     Scaffold (
         modifier = Modifier.fillMaxSize(),
@@ -92,7 +110,7 @@ fun HomeScreen(
         ) {
             LazyColumn {
                 items(catagories.size) { i ->
-                    GenerateLazyRows(catagories[i])
+                    GenerateLazyRows(catagories[i], navController)
                 }
             }
         }
@@ -127,7 +145,7 @@ fun BottomBar() {
 }
 
 @Composable
-fun GenerateLazyRows(catagory: String) {
+fun GenerateLazyRows(catagory: String, navController: NavController) {
     Row (
         modifier = Modifier
             .fillMaxWidth()
@@ -145,7 +163,7 @@ fun GenerateLazyRows(catagory: String) {
                 )
                 TextButton(
                     modifier = Modifier.padding(start = 8.dp),
-                    onClick = { /*TODO*/ }
+                    onClick = { navController.navigate(Navigator.CategoryPage(id = 222, catagory = catagory)) }
                 ) {
                     Text(text = "see all")
                 }
@@ -211,6 +229,13 @@ fun GenerateLazyRows(catagory: String) {
         }
     }
     Spacer(modifier = Modifier.height(16.dp))
+}
+
+interface Navigator {
+    @Serializable
+    data object HomeScreen: Navigator
+    @Serializable
+    data class CategoryPage(val id: Int, val catagory: String): Navigator
 }
 
 var catagories: MutableList<String> = mutableListOf("Top 10", "Top picks for your", "Now Streaming", "In theaters")
