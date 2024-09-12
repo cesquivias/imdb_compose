@@ -40,7 +40,6 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import kotlinx.serialization.Serializable
 
-
 @Composable
 fun CategoryPage(
     category: String,
@@ -54,7 +53,7 @@ fun CategoryPage(
             Top(category, clickHandlerBackBtn)
         },
         bottomBar = {
-            BottomBar()
+            BottomBar(navController)
         }
     ) { paddingValues ->
         Box(

@@ -114,7 +114,7 @@ class HomeScreenViewModel() : ViewModel() {
      *           "video": false,
      *           "vote_average": 8.516,
      *           "vote_count": 32523
-     *         },
+     *         }
      *     ]
      * }
      */

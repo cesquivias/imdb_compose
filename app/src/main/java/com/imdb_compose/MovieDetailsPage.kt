@@ -25,7 +25,7 @@ fun MovieDetailsPage(
             Top(movie, clickHandlerBackBtn)
         },
         bottomBar = {
-            BottomBar()
+            BottomBar(navController)
         }
     ) { paddingValues ->
         Box(
@@ -35,7 +35,6 @@ fun MovieDetailsPage(
             contentAlignment = Alignment.Center
         ) {
             val movies = viewModel.movieListOfWeek.collectAsState()
-
             Text(text = movie)
         }
     }

@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -58,7 +59,6 @@ interface Navigator {
     data class MovieDetailsPage(val movie: String): Navigator
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +73,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(navController = navController, startDestination = Navigator.HomeScreen ) {
                         composable<Navigator.HomeScreen> {
-                            HomeScreen(top = { TopBar() }, bottom = { BottomBar() }, viewModel = viewModel, navController = navController)
+                            HomeScreen(top = { TopBar() }, bottom = { BottomBar(navController) }, viewModel = viewModel, navController = navController)
                         }
                         composable<Navigator.CategoryPage> {
                             val args =  it.toRoute<Navigator.CategoryPage>()
@@ -132,16 +132,24 @@ fun TopBar() {
 }
 
 @Composable
-fun BottomBar() {
+fun BottomBar(navController: NavController) {
     BottomAppBar(
         modifier = Modifier.fillMaxWidth(),
         actions = {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Icon(imageVector = Icons.Default.Home, contentDescription = "home")
-                    Icon(imageVector = Icons.Default.Search, contentDescription = "search")
-                    Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "home")
-                    Icon(imageVector = Icons.Default.Person, contentDescription = "profile")
+                    IconButton(onClick = { navController.navigate(Navigator.HomeScreen) }) {
+                        Icon(imageVector = Icons.Default.Home, contentDescription = "home")
+                    }
+                    IconButton(onClick = {}) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "search")
+                    }
+                    IconButton(onClick = {}) {
+                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "home")
+                    }
+                    IconButton(onClick = {}) {
+                        Icon(imageVector = Icons.Default.Person, contentDescription = "profile")
+                    }
                 }
             }
         }
