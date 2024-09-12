@@ -10,6 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Header
 import retrofit2.http.Headers
 
+
 object Retrofit {
     private const val BASE_URL ="https://api.themoviedb.org/"
 
@@ -28,4 +29,7 @@ object Retrofit {
 interface MovieApi {
     @GET("3/trending/movie/week?language=en-US&api_key=")
     suspend fun getMoviesOfWeekList() : MovieList
+
+    @GET("3/person/popular?language=en-US&api_key=")
+    suspend fun getPopularPersons() : ActorList
 }
