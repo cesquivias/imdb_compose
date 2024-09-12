@@ -44,12 +44,17 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ComposeCompilerApi
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.NotificationCompat.Action
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.NavHost
 import androidx.navigation.Navigation
@@ -58,7 +63,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.imdb_compose.ui.theme.Imdb_composeTheme
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import retrofit2.Response
+import kotlin.reflect.KProperty
+
+interface Navigator {
+    @Serializable
+    data object HomeScreen: Navigator
+    @Serializable
+    data class CategoryPage(val id: Int, val catagory: String): Navigator
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -74,11 +93,12 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(navController = navController, startDestination = Navigator.HomeScreen ) {
                         composable<Navigator.HomeScreen> {
-                            HomeScreen(top = { TopBar() }, bottom = { BottomBar() }, navController = navController)
+                            val viewModel = HomeScreenViewModel()
+                            HomeScreen(top = { TopBar() }, bottom = { BottomBar() }, viewModel = viewModel, navController = navController)
                         }
                         composable<Navigator.CategoryPage> {
                             val args =  it.toRoute<Navigator.CategoryPage>()
-                            CategoryPage(args.id, args.catagory)
+                            CategoryPage(args.id, args.catagory, { navController.popBackStack() })
                         }
                     }
                 }
@@ -92,6 +112,7 @@ class MainActivity : ComponentActivity() {
 fun HomeScreen(
     top: @Composable () -> Unit,
     bottom: @Composable () -> Unit,
+    viewModel: HomeScreenViewModel,
     navController: NavController
 ) {
     Scaffold (
@@ -109,8 +130,8 @@ fun HomeScreen(
                 .padding(paddingValues)
         ) {
             LazyColumn {
-                items(catagories.size) { i ->
-                    GenerateLazyRows(catagories[i], navController)
+                items(viewModel.catagories.size) { i ->
+                    GenerateLazyRows(viewModel.catagories[i], viewModel = viewModel, navController)
                 }
             }
         }
@@ -145,7 +166,11 @@ fun BottomBar() {
 }
 
 @Composable
-fun GenerateLazyRows(catagory: String, navController: NavController) {
+fun GenerateLazyRows(catagory: String, viewModel: HomeScreenViewModel, navController: NavController) {
+    val currentMovies: State<MovieList?> = when (catagory) {
+        "Movies of the week" -> viewModel.movieListOfWeek.collectAsState()
+        else -> viewModel.noMovies.collectAsState()
+    }
     Row (
         modifier = Modifier
             .fillMaxWidth()
@@ -169,57 +194,62 @@ fun GenerateLazyRows(catagory: String, navController: NavController) {
                 }
             }
             LazyRow {
-                items(movies.size) { i ->
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                        Box (
-                            modifier = Modifier
-                                .width(125.dp)
-                                .height(175.dp)
-                                .border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
-                                .padding(end = 8.dp),
-                                contentAlignment = Alignment.TopStart
-                        ) {
-                            Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
-                                Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
-                            }
-                            Text(
-                                text = movies[i],
-                                softWrap = false,
-                                modifier = Modifier.align(Alignment.Center)
-                            )
-
-                        }
-                        Box (
-                            modifier = Modifier
-                                .width(125.dp)
-                                .height(100.dp)
-                                .border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
-                                .padding(end = 8.dp),
-                            contentAlignment = Alignment.TopStart
-                        ) {
-                            Box(
-                                modifier = Modifier.padding(4.dp)
-                            ) {
-                                Column (
-                                    modifier = Modifier.fillMaxHeight(),
-                                    verticalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    Text(
-                                        text = "${ i + 1 }",
-                                        modifier = Modifier,
-                                        fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                currentMovies.value?.results?.forEachIndexed { i, movie ->
+                    item {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                            Box (
+                                modifier = Modifier
+                                    .width(125.dp)
+                                    .height(175.dp)
+                                    .border(
+                                        width = 2.dp,
+                                        color = MaterialTheme.colorScheme.outline
                                     )
-                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-                                    Text(text = movies[i])
+                                    .padding(end = 8.dp),
+                                contentAlignment = Alignment.TopStart
+                            ) {
+                                Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
+                                    Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
+                                }
+                                Text(
+                                    text = movie.title,
+                                    softWrap = false,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+
+                            }
+                            Box (
+                                modifier = Modifier
+                                    .width(125.dp)
+                                    .height(100.dp)
+                                    .border(
+                                        width = 2.dp,
+                                        color = MaterialTheme.colorScheme.outline
+                                    )
+                                    .padding(end = 8.dp),
+                                contentAlignment = Alignment.TopStart
+                            ) {
+                                Box(
+                                    modifier = Modifier.padding(4.dp)
+                                ) {
+                                    Column (
+                                        modifier = Modifier.fillMaxHeight(),
+                                        verticalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        Text(
+                                            text = "${ i + 1 }",
+                                            modifier = Modifier,
+                                            fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+                                            fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                            fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                                        )
+                                        Row(modifier = Modifier.fillMaxWidth()) {
+                                            Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
+                                            Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
+                                        }
+                                        Text(text = movie.title)
+                                    }
                                 }
                             }
                         }
@@ -231,12 +261,7 @@ fun GenerateLazyRows(catagory: String, navController: NavController) {
     Spacer(modifier = Modifier.height(16.dp))
 }
 
-interface Navigator {
-    @Serializable
-    data object HomeScreen: Navigator
-    @Serializable
-    data class CategoryPage(val id: Int, val catagory: String): Navigator
-}
 
-var catagories: MutableList<String> = mutableListOf("Top 10", "Top picks for your", "Now Streaming", "In theaters")
-var movies: MutableList<String> = mutableListOf("Game of Thrones", "Deadpool", "Dumb & Dumber", "New Hope", "Empire", "Last Jedi", "Foobar", "Bazboo", "Foobaz", "FooLee")
+
+
+

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Button
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +15,8 @@ import androidx.compose.ui.Modifier
 @Composable
 fun CategoryPage(
     id: Int,
-    category: String
+    category: String,
+    clickHandler: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -26,6 +28,9 @@ fun CategoryPage(
             Column {
                 Text(text = "Movie ID :: ${ id }")
                 Text(text = "Movie category :: ${ category }")
+                Button(onClick = { clickHandler() }) {
+                    Text(text = "Go Back")
+                }
             }
         }
     }
