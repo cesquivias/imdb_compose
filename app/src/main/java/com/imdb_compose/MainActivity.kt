@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -183,9 +184,9 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                 }
 
                 when(catagory) {
-                    "Movies of the week" -> CreateMovieDetailsBox(viewModel.movieListOfWeek.collectAsState())
-                    "Popular actors" -> CreateActorDetailsBox(viewModel.popularPersons.collectAsState())
-                    else -> CreateMovieDetailsBox(viewModel.noMovies.collectAsState())
+                    "Movies of the week" -> CreateMovieDetailsBox(viewModel.movieListOfWeek.collectAsState(), navController)
+                    "Popular actors" -> CreateActorDetailsBox(viewModel.popularPersons.collectAsState(), navController)
+                    else -> CreateMovieDetailsBox(viewModel.noMovies.collectAsState(), navController)
                 }
             }
         }
@@ -194,7 +195,7 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
 }
 
 @Composable
-fun CreateMovieDetailsBox(movies: State<MovieList?>) {
+fun CreateMovieDetailsBox(movies: State<MovieList?>, navController: NavController) {
     LazyRow {
         movies.value?.results?.forEachIndexed { i, movie ->
             item {
@@ -208,7 +209,8 @@ fun CreateMovieDetailsBox(movies: State<MovieList?>) {
                                 width = 2.dp,
                                 color = MaterialTheme.colorScheme.outline
                             )
-                            .padding(end = 8.dp),
+                            .padding(end = 8.dp)
+                            .clickable { navController.navigate(Navigator.MovieDetailsPage(movie.title)) },
                         contentAlignment = Alignment.TopStart
                     ) {
                         Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
@@ -261,7 +263,7 @@ fun CreateMovieDetailsBox(movies: State<MovieList?>) {
 }
 
 @Composable
-fun CreateActorDetailsBox(persons: State<ActorList?>) {
+fun CreateActorDetailsBox(persons: State<ActorList?>, navController: NavController) {
     LazyRow {
         persons.value?.results?.forEachIndexed { i, person ->
             item {
