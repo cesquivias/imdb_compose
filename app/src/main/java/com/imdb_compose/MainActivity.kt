@@ -159,7 +159,7 @@ fun BottomBar(navController: NavController) {
 
 @Composable
 fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavController) {
-    viewModel.catagories.forEachIndexed { i, catagory ->
+    viewModel.catagories.shuffled().forEachIndexed { i, catagory ->
         Row (
             modifier = Modifier
                 .fillMaxWidth()
@@ -185,7 +185,12 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
 
                 when(catagory) {
                     "Movies of the week" -> CreateMovieDetailsBox(viewModel.movieListOfWeek.collectAsState(), navController)
+                    "Trending movies" -> CreateMovieDetailsBox(viewModel.trendingMovies.collectAsState(), navController)
+                    "Upcoming movies" -> CreateMovieDetailsBox(viewModel.upcomingMovies.collectAsState(), navController)
+                    "Trending tv" -> CreateTvDetailsBox(viewModel.trendingTv.collectAsState(), navController)
+                    "Airing today" -> CreateTvDetailsBox(viewModel.airingTodayTv.collectAsState(), navController)
                     "Popular actors" -> CreateActorDetailsBox(viewModel.popularPersons.collectAsState(), navController)
+                    "Trending people" -> CreateActorDetailsBox(viewModel.trendingPersons.collectAsState(), navController)
                     else -> CreateMovieDetailsBox(viewModel.noMovies.collectAsState(), navController)
                 }
             }
@@ -221,7 +226,6 @@ fun CreateMovieDetailsBox(movies: State<MovieList?>, navController: NavControlle
                             softWrap = false,
                             modifier = Modifier.align(Alignment.Center)
                         )
-
                     }
                     Box (
                         modifier = Modifier
@@ -329,3 +333,69 @@ fun CreateActorDetailsBox(persons: State<ActorList?>, navController: NavControll
     }
 }
 
+@Composable
+fun CreateTvDetailsBox(tvShows: State<TvList?>, navController: NavController) {
+    LazyRow {
+        tvShows.value?.results?.forEachIndexed { i, show ->
+            item {
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                    Box (
+                        modifier = Modifier
+                            .width(125.dp)
+                            .height(175.dp)
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            .padding(end = 8.dp),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
+                            Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
+                        }
+                        Text(
+                            text = show.name,
+                            softWrap = false,
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+
+                    }
+                    Box (
+                        modifier = Modifier
+                            .width(125.dp)
+                            .height(100.dp)
+                            .border(
+                                width = 2.dp,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                            .padding(end = 8.dp),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            Column (
+                                modifier = Modifier.fillMaxHeight(),
+                                verticalArrangement = Arrangement.SpaceEvenly
+                            ) {
+                                Text(
+                                    text = "${ i + 1 }",
+                                    modifier = Modifier,
+                                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                                )
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
+                                    Text(modifier = Modifier.padding(start = 8.dp), text = show.popularity)
+                                }
+                                Text(text = show.original_name)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

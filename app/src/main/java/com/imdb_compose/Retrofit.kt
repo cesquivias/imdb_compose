@@ -31,9 +31,27 @@ object Retrofit {
 }
 
 interface MovieApi {
-    @GET("3/trending/movie/week?language=en-US&api_key=${BuildConfig.API_KEY}")
-    suspend fun getMoviesOfWeekList() : MovieList
+    // Movies
+    @GET("3/trending/movie/week?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getMoviesOfWeekList(): MovieList
 
-    @GET("3/person/popular?language=en-US&api_key=${BuildConfig.API_KEY}")
-    suspend fun getPopularPersons() : ActorList
+    @GET("3/trending/movie/day?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getTrendingMovies(): MovieList
+
+    @GET("3/movie/upcoming?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getUpcomingMovies(): MovieList
+
+    // Television
+    @GET("3/trending/tv/day?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getTrendingTv(): TvList
+
+    @GET("3/tv/airing_today?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getAiringTodayTv(): TvList
+
+    // People
+    @GET("3/person/popular?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getPopularPersons(): ActorList
+
+    @GET("3/trending/person/day?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getTrendingPersons(): ActorList
 }
