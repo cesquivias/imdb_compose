@@ -1,4 +1,5 @@
 import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -19,6 +20,17 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val authPropertiesFile = project.rootProject.file("auth.properties")
+        val properties = Properties()
+        properties.load(authPropertiesFile.inputStream())
+
+        val api_key = properties.getProperty("API_KEY") ?: ""
+        val api_read_acces_token = properties.getProperty("API_READ_ACCESS_TOKEN") ?: ""
+
+        buildConfigField(type = "String", name = "API_KEY", value = api_key)
+        buildConfigField(type = "String", name = "api_read_acces_token", value = api_read_acces_token)
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -37,12 +49,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
     buildFeatures {
         compose = true
+        buildConfig = true
     }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
