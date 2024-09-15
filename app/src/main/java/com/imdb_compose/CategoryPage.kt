@@ -49,7 +49,7 @@ fun CategoryPage(
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            Top(category, clickHandlerBackBtn)
+            TopBarWithBackBtn(category, clickHandlerBackBtn)
         },
         bottomBar = {
             BottomBar(navController)
@@ -72,7 +72,7 @@ fun CategoryPage(
                                 .height(100.dp)
                                 .fillMaxWidth()
                                 .border(width = 1.dp, color = Color.Black)
-                                .clickable { navController.navigate(Navigator.MovieDetailsPage(movie = movie.title)) },
+                                .clickable { navController.navigate(Navigator.MovieDetailsPage(movie.title)) },
                             horizontalArrangement = Arrangement.Start,
                         ) {
                             Box(
@@ -82,6 +82,7 @@ fun CategoryPage(
                                     modifier = Modifier.fillMaxHeight(),
                                     verticalArrangement = Arrangement.SpaceBetween
                                 ) {
+                                    Text(text = "Catagory Page")
                                     Text(text = movie.title)
                                     Text(text = movie.overview)
                                 }
@@ -93,23 +94,3 @@ fun CategoryPage(
         }
     }
 }
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Top(
-    category: String,
-    backBtn: () -> Unit
-) {
-    TopAppBar(
-        modifier = Modifier,
-        title = {
-            Text(text = category)
-        },
-        navigationIcon = {
-            IconButton(onClick = { backBtn() }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back")
-            }
-        }
-    )
-}
-

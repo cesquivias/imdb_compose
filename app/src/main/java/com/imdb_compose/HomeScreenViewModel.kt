@@ -43,7 +43,16 @@ import retrofit2.Response
 
 class HomeScreenViewModel() : ViewModel() {
     private val movieApi = Retrofit.getInstance().create(MovieApi::class.java)
-    val catagories: MutableList<String> = mutableListOf("Movies of the week", "Popular actors", "Trending tv", "Trending movies", "Upcoming movies", "Trending people", "Airing today")
+    val catagories: List<String> = listOf(
+        "Movies of the week",
+        "Popular actors",
+        "Trending tv",
+        "Trending movies",
+        "Upcoming movies",
+        "Trending people",
+        "Tv airing today"
+    ).shuffled()
+
     val noMovies: MutableStateFlow<MovieList?> = MutableStateFlow(null)
 
     // Movies

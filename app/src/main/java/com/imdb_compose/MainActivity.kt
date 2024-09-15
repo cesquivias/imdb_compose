@@ -21,12 +21,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AddBox
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -49,6 +51,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.imdb_compose.ui.theme.Imdb_composeTheme
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 interface Navigator {
@@ -58,6 +61,10 @@ interface Navigator {
     data class CategoryPage(val catagory: String): Navigator
     @Serializable
     data class MovieDetailsPage(val movie: String): Navigator
+    @Serializable
+    data class PersonDetailsPage(val person: String): Navigator
+    @Serializable
+    data class TvDetailsPage(val show: String): Navigator
 }
 
 class MainActivity : ComponentActivity() {
@@ -74,7 +81,7 @@ class MainActivity : ComponentActivity() {
 
                     NavHost(navController = navController, startDestination = Navigator.HomeScreen ) {
                         composable<Navigator.HomeScreen> {
-                            HomeScreen(top = { TopBar() }, bottom = { BottomBar(navController) }, viewModel = viewModel, navController = navController)
+                            HomeScreen(top = { TopBarNoNav() }, bottom = { BottomBar(navController) }, viewModel = viewModel, navController = navController)
                         }
                         composable<Navigator.CategoryPage> {
                             val args =  it.toRoute<Navigator.CategoryPage>()
@@ -83,6 +90,14 @@ class MainActivity : ComponentActivity() {
                         composable<Navigator.MovieDetailsPage> {
                             val args =  it.toRoute<Navigator.MovieDetailsPage>()
                             MovieDetailsPage(args.movie, viewModel = viewModel, navController = navController, { navController.popBackStack() })
+                        }
+                        composable<Navigator.PersonDetailsPage> {
+                            val args =  it.toRoute<Navigator.PersonDetailsPage>()
+                            PersonDetailsPage(args.person, viewModel = viewModel, navController = navController, { navController.popBackStack() })
+                        }
+                        composable<Navigator.TvDetailsPage> {
+                            val args =  it.toRoute<Navigator.TvDetailsPage>()
+                            TvDetailsPage(args.show, viewModel = viewModel, navController = navController, { navController.popBackStack() })
                         }
                     }
                 }
@@ -124,10 +139,29 @@ fun HomeScreen(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun TopBar() {
+fun TopBarNoNav() {
     TopAppBar(
         title = {
             Text(text = "What to watch")
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TopBarWithBackBtn(
+    title: String,
+    backBtn: () -> Unit
+) {
+    TopAppBar(
+        modifier = Modifier,
+        title = {
+            Text(text = title)
+        },
+        navigationIcon = {
+            IconButton(onClick = { backBtn() }) {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back")
+            }
         }
     )
 }
@@ -159,7 +193,7 @@ fun BottomBar(navController: NavController) {
 
 @Composable
 fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavController) {
-    viewModel.catagories.shuffled().forEachIndexed { i, catagory ->
+    viewModel.catagories.forEachIndexed { i, catagory ->
         Row (
             modifier = Modifier
                 .fillMaxWidth()
@@ -188,9 +222,9 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                     "Trending movies" -> CreateMovieDetailsBox(viewModel.trendingMovies.collectAsState(), navController)
                     "Upcoming movies" -> CreateMovieDetailsBox(viewModel.upcomingMovies.collectAsState(), navController)
                     "Trending tv" -> CreateTvDetailsBox(viewModel.trendingTv.collectAsState(), navController)
-                    "Airing today" -> CreateTvDetailsBox(viewModel.airingTodayTv.collectAsState(), navController)
-                    "Popular actors" -> CreateActorDetailsBox(viewModel.popularPersons.collectAsState(), navController)
-                    "Trending people" -> CreateActorDetailsBox(viewModel.trendingPersons.collectAsState(), navController)
+                    "Tv airing today" -> CreateTvDetailsBox(viewModel.airingTodayTv.collectAsState(), navController)
+                    "Popular actors" -> CreatePersonDetailsBox(viewModel.popularPersons.collectAsState(), navController)
+                    "Trending people" -> CreatePersonDetailsBox(viewModel.trendingPersons.collectAsState(), navController)
                     else -> CreateMovieDetailsBox(viewModel.noMovies.collectAsState(), navController)
                 }
             }
@@ -267,7 +301,7 @@ fun CreateMovieDetailsBox(movies: State<MovieList?>, navController: NavControlle
 }
 
 @Composable
-fun CreateActorDetailsBox(persons: State<ActorList?>, navController: NavController) {
+fun CreatePersonDetailsBox(persons: State<ActorList?>, navController: NavController) {
     LazyRow {
         persons.value?.results?.forEachIndexed { i, person ->
             item {
@@ -281,18 +315,18 @@ fun CreateActorDetailsBox(persons: State<ActorList?>, navController: NavControll
                                 width = 2.dp,
                                 color = MaterialTheme.colorScheme.outline
                             )
-                            .padding(end = 8.dp),
-                        contentAlignment = Alignment.TopStart
+                            .padding(end = 8.dp)
+                            .clickable { navController.navigate(Navigator.PersonDetailsPage(person.name)) },
+                        contentAlignment = Alignment.BottomStart
                     ) {
-                        Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
-                            Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
+                        Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
+                            Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "favorite")
                         }
                         Text(
                             text = person.name,
                             softWrap = false,
                             modifier = Modifier.align(Alignment.Center)
                         )
-
                     }
                     Box (
                         modifier = Modifier
@@ -313,17 +347,17 @@ fun CreateActorDetailsBox(persons: State<ActorList?>, navController: NavControll
                                 verticalArrangement = Arrangement.SpaceEvenly
                             ) {
                                 Text(
-                                    text = "${ i + 1 }",
+                                    text = person.original_name,
                                     modifier = Modifier,
                                     fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
                                     fontSize = MaterialTheme.typography.titleLarge.fontSize,
                                     fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
                                 )
+                                Text(text = person.known_for_department)
                                 Row(modifier = Modifier.fillMaxWidth()) {
                                     Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
                                     Text(modifier = Modifier.padding(start = 8.dp), text = person.popularity)
                                 }
-                                Text(text = person.known_for_department)
                             }
                         }
                     }
@@ -348,7 +382,8 @@ fun CreateTvDetailsBox(tvShows: State<TvList?>, navController: NavController) {
                                 width = 2.dp,
                                 color = MaterialTheme.colorScheme.outline
                             )
-                            .padding(end = 8.dp),
+                            .padding(end = 8.dp)
+                            .clickable { navController.navigate(Navigator.TvDetailsPage(show.name)) },
                         contentAlignment = Alignment.TopStart
                     ) {
                         Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
