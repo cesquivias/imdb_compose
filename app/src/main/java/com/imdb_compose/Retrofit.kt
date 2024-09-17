@@ -7,8 +7,10 @@ import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.Headers
+import retrofit2.http.Path
 
 /**
  * API key
@@ -52,6 +54,9 @@ interface MovieApi {
     @GET("3/person/popular?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getPopularPersons(): ActorList
 
-    @GET("3/trending/person/day?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("3/trending/person/day?language=en-US&append_to_response=details&api_key=${ BuildConfig.API_KEY }")
     suspend fun getTrendingPersons(): ActorList
+
+    @GET("3/person/{id}?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getPersonDetails(@Path("id") id: Int): ActorDetail
 }

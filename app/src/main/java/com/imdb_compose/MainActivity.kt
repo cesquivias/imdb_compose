@@ -51,7 +51,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.imdb_compose.ui.theme.Imdb_composeTheme
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 interface Navigator {
@@ -62,7 +61,7 @@ interface Navigator {
     @Serializable
     data class MovieDetailsPage(val movie: String): Navigator
     @Serializable
-    data class PersonDetailsPage(val person: String): Navigator
+    data class PersonDetailsPage(val person: String, val id: Int): Navigator
     @Serializable
     data class TvDetailsPage(val show: String): Navigator
 }
@@ -93,7 +92,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable<Navigator.PersonDetailsPage> {
                             val args =  it.toRoute<Navigator.PersonDetailsPage>()
-                            PersonDetailsPage(args.person, viewModel = viewModel, navController = navController, { navController.popBackStack() })
+                            PersonDetailsPage(args.person, args.id, viewModel = viewModel, navController = navController, { navController.popBackStack() })
                         }
                         composable<Navigator.TvDetailsPage> {
                             val args =  it.toRoute<Navigator.TvDetailsPage>()
@@ -309,14 +308,14 @@ fun CreatePersonDetailsBox(persons: State<ActorList?>, navController: NavControl
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
                     Box (
                         modifier = Modifier
-                            .width(125.dp)
-                            .height(175.dp)
+                            .width(175.dp)
+                            .height(225.dp)
                             .border(
                                 width = 2.dp,
                                 color = MaterialTheme.colorScheme.outline
                             )
                             .padding(end = 8.dp)
-                            .clickable { navController.navigate(Navigator.PersonDetailsPage(person.name)) },
+                            .clickable { navController.navigate(Navigator.PersonDetailsPage(person.name, person.id)) },
                         contentAlignment = Alignment.BottomStart
                     ) {
                         Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
@@ -330,8 +329,8 @@ fun CreatePersonDetailsBox(persons: State<ActorList?>, navController: NavControl
                     }
                     Box (
                         modifier = Modifier
-                            .width(125.dp)
-                            .height(100.dp)
+                            .width(175.dp)
+                            .height(125.dp)
                             .border(
                                 width = 2.dp,
                                 color = MaterialTheme.colorScheme.outline

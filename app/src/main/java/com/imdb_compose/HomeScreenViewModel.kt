@@ -2,6 +2,7 @@ package com.imdb_compose
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -274,6 +275,31 @@ class HomeScreenViewModel() : ViewModel() {
      * }
      */
 
+    private val _personDetails: MutableStateFlow<ActorDetail?> = MutableStateFlow(null)
+    val personDetails: StateFlow<ActorDetail?> = _personDetails.asStateFlow()
+    /**
+     * {
+     *   "adult": false,
+     *   "also_known_as": [
+     *     "James Earl Boggins Jones",
+     *     "Todd Jones",
+     *     "Jimmy"
+     *   ],
+     *   "biography": "James Earl Jones (January 17, 1931 – September 9, 2024) was an American actor. He was described as \"one of America's most distinguished and versatile\" actors for his performances on stage and screen, and \"one of the greatest actors in American history\". Over his career, he received three Tony Awards, two Emmy Awards, and a Grammy Award. He was inducted into the American Theater Hall of Fame in 1985. He was honored with the National Medal of Arts in 1992, the Kennedy Center Honor in 2002, the Screen Actors Guild Life Achievement Award in 2009 and the Honorary Academy Award in 2011. His deep voice has been praised as a \"stirring basso profondo that has lent gravel and gravitas\" to his projects.",
+     *   "birthday": "1931-01-17",
+     *   "deathday": "2024-09-09",
+     *   "gender": 2,
+     *   "homepage": null,
+     *   "id": 15152,
+     *   "imdb_id": "nm0000469",
+     *   "known_for_department": "Acting",
+     *   "name": "James Earl Jones",
+     *   "place_of_birth": "Arkabutla, Mississippi, USA",
+     *   "popularity": 161.979,
+     *   "profile_path": "/sgc8yxYr8ecNn1TXjWXWx3wmUYA.jpg"
+     * }
+     */
+
     init {
         // Movies
         viewModelScope.launch {
@@ -305,6 +331,13 @@ class HomeScreenViewModel() : ViewModel() {
         viewModelScope.launch {
             val result = movieApi.getTrendingPersons()
             _trendingPersons.value = result
+        }
+    }
+
+    suspend fun getPersonDetails(id: Int) {
+        viewModelScope.launch {
+            val result = movieApi.getPersonDetails(id)
+            _personDetails.value = result
         }
     }
 }
@@ -355,3 +388,36 @@ data class ActorResult(
     val vote_average: String,
     val known_for: List<MovieResult>
 )
+
+data class ActorDetail(
+    val name: String,
+    val id: Int,
+    val biography: String,
+    val birthday: String,
+    val deathDay: String,
+    val place_of_birth: String,
+    val profile_path: String,
+    val popularity: String
+)
+/**
+ * {
+ *   "adult": false,
+ *   "also_known_as": [
+ *     "James Earl Boggins Jones",
+ *     "Todd Jones",
+ *     "Jimmy"
+ *   ],
+ *   "biography": "James Earl Jones (January 17, 1931 – September 9, 2024) was an American actor. He was described as \"one of America's most distinguished and versatile\" actors for his performances on stage and screen, and \"one of the greatest actors in American history\". Over his career, he received three Tony Awards, two Emmy Awards, and a Grammy Award. He was inducted into the American Theater Hall of Fame in 1985. He was honored with the National Medal of Arts in 1992, the Kennedy Center Honor in 2002, the Screen Actors Guild Life Achievement Award in 2009 and the Honorary Academy Award in 2011. His deep voice has been praised as a \"stirring basso profondo that has lent gravel and gravitas\" to his projects.",
+ *   "birthday": "1931-01-17",
+ *   "deathday": "2024-09-09",
+ *   "gender": 2,
+ *   "homepage": null,
+ *   "id": 15152,
+ *   "imdb_id": "nm0000469",
+ *   "known_for_department": "Acting",
+ *   "name": "James Earl Jones",
+ *   "place_of_birth": "Arkabutla, Mississippi, USA",
+ *   "popularity": 161.979,
+ *   "profile_path": "/sgc8yxYr8ecNn1TXjWXWx3wmUYA.jpg"
+ * }
+ */
