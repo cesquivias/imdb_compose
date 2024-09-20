@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -315,7 +316,14 @@ fun CreatePersonDetailsBox(persons: State<ActorList?>, navController: NavControl
                                 color = MaterialTheme.colorScheme.outline
                             )
                             .padding(end = 8.dp)
-                            .clickable { navController.navigate(Navigator.PersonDetailsPage(person.name, person.id)) },
+                            .clickable {
+                                navController.navigate(
+                                    Navigator.PersonDetailsPage(
+                                        person.name,
+                                        person.id
+                                    )
+                                )
+                            },
                         contentAlignment = Alignment.BottomStart
                     ) {
                         Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
@@ -432,4 +440,9 @@ fun CreateTvDetailsBox(tvShows: State<TvList?>, navController: NavController) {
             }
         }
     }
+}
+
+@Composable
+fun isLoading() {
+    CircularProgressIndicator(modifier = Modifier.fillMaxSize().padding(128.dp), color = MaterialTheme.colorScheme.outline)
 }

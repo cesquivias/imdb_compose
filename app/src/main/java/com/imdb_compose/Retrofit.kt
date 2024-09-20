@@ -3,13 +3,8 @@ package com.imdb_compose
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.Response
 import retrofit2.http.GET
-import retrofit2.http.Query
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.Body
-import retrofit2.http.Header
-import retrofit2.http.Headers
 import retrofit2.http.Path
 
 /**
@@ -33,7 +28,6 @@ object Retrofit {
 }
 
 interface MovieApi {
-    // Movies
     @GET("3/trending/movie/week?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getMoviesOfWeekList(): MovieList
 
@@ -42,15 +36,21 @@ interface MovieApi {
 
     @GET("3/movie/upcoming?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getUpcomingMovies(): MovieList
+}
 
-    // Television
+interface TvApi {
     @GET("3/trending/tv/day?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getTrendingTv(): TvList
 
     @GET("3/tv/airing_today?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getAiringTodayTv(): TvList
 
-    // People
+    @GET("3/tv/{series_id}/images/{img_path}")
+    suspend fun getTvImg(@Path("series_id") id: Int, @Path("img_path") imgPath: String): ImageResults
+
+}
+
+interface PeopleApi {
     @GET("3/person/popular?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getPopularPersons(): ActorList
 

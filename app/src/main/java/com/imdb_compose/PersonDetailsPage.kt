@@ -58,6 +58,7 @@ fun PersonDetailsPage(
                 contentAlignment = Alignment.Center
             ) {
                 Column {
+                    isLoading()
                     Text("Loading...")
                 }
             }

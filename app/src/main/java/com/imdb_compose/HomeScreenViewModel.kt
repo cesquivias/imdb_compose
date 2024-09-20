@@ -44,6 +44,9 @@ import retrofit2.Response
 
 class HomeScreenViewModel() : ViewModel() {
     private val movieApi = Retrofit.getInstance().create(MovieApi::class.java)
+    private val tvApi = Retrofit.getInstance().create(TvApi::class.java)
+    private val peopleApi = Retrofit.getInstance().create(PeopleApi::class.java)
+
     val catagories: List<String> = listOf(
         "Movies of the week",
         "Popular actors",
@@ -316,27 +319,27 @@ class HomeScreenViewModel() : ViewModel() {
         }
         // Television
         viewModelScope.launch {
-            val result = movieApi.getTrendingTv()
+            val result = tvApi.getTrendingTv()
             _trendingTv.value = result
         }
         viewModelScope.launch {
-            val result = movieApi.getAiringTodayTv()
+            val result = tvApi.getAiringTodayTv()
             _airingTodayTv.value = result
         }
         // People
         viewModelScope.launch {
-            val result = movieApi.getPopularPersons()
+            val result = peopleApi.getPopularPersons()
             _popularPersons.value = result
         }
         viewModelScope.launch {
-            val result = movieApi.getTrendingPersons()
+            val result = peopleApi.getTrendingPersons()
             _trendingPersons.value = result
         }
     }
 
     suspend fun getPersonDetails(id: Int) {
         viewModelScope.launch {
-            val result = movieApi.getPersonDetails(id)
+            val result = peopleApi.getPersonDetails(id)
             _personDetails.value = result
         }
     }
