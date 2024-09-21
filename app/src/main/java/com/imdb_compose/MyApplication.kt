@@ -8,9 +8,12 @@ import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.util.DebugLogger
 import okhttp3.Call
+import okhttp3.OkHttpClient
 
 class MyApplication: Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
+        val okHttpClient = OkHttpClient.Builder().build()
+
         return ImageLoader(this).newBuilder()
             .memoryCachePolicy(CachePolicy.ENABLED)
             .memoryCache {
@@ -26,12 +29,16 @@ class MyApplication: Application(), ImageLoaderFactory {
                     .directory(cacheDir)
                     .build()
             }
-//            .callFactory {
-//                Call.Factory {
-//                    it.url = "${it.url}&api_key=${BuildConfig.API_KEY}"
-//                    it.newBuilder().addHeader("Authorization", BuildConfig.API_KEY)
-//                }
-//            }
+            .callFactory {
+                Call.Factory {
+                    okHttpClient.newCall(
+                        it.newBuilder().addHeader(
+                            "Authorization",
+                            "Bearer ${ BuildConfig.API_READ_ACCESS_TOKEN }")
+                            .build()
+                    )
+                }
+            }
             .logger(DebugLogger())
             .build()
     }

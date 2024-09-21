@@ -1,5 +1,12 @@
 package com.imdb_compose
 
+import com.imdb_compose.Retrofit.AIRING_TODAY_TV_PATH
+import com.imdb_compose.Retrofit.MOVIES_OF_WEEK_PATH
+import com.imdb_compose.Retrofit.POPULAR_PERSONS_PATH
+import com.imdb_compose.Retrofit.TRENDING_MOVIES_DAY_PATH
+import com.imdb_compose.Retrofit.TRENDING_PERSONS_DAY_PATH
+import com.imdb_compose.Retrofit.TRENDING_TV_DAY_PATH
+import com.imdb_compose.Retrofit.UPCOMING_MOVIE_PATH
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -13,7 +20,25 @@ import retrofit2.http.Path
  */
 
 object Retrofit {
-    private const val BASE_URL ="https://api.themoviedb.org/"
+    const val BASE_URL = "https://api.themoviedb.org/"
+    const val BASE_IMAGE_URL = "https://image.tmdb.org/"
+
+    const val MOVIES_OF_WEEK_PATH = "3/trending/movie/week"
+    const val TRENDING_MOVIES_DAY_PATH = "3/trending/movie/day"
+    const val UPCOMING_MOVIE_PATH = "3/movie/upcoming"
+
+    const val TRENDING_TV_DAY_PATH = "3/trending/tv/day"
+    const val AIRING_TODAY_TV_PATH = "3/tv/airing_today"
+
+    const val POPULAR_PERSONS_PATH = "3/person/popular"
+    const val TRENDING_PERSONS_DAY_PATH = "3/trending/person/day"
+
+    const val IMAGE_PATH =  "t/p/original/"
+    const val IMAGE_PATH_w500 = "t/p/w500/"
+
+    fun getMovieImgUrl(id: Int): String {
+        return "3/movie/${id}/images"
+    }
 
     fun getInstance(): Retrofit {
         val client = OkHttpClient()
@@ -28,33 +53,32 @@ object Retrofit {
 }
 
 interface MovieApi {
-    @GET("3/trending/movie/week?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ MOVIES_OF_WEEK_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getMoviesOfWeekList(): MovieList
 
-    @GET("3/trending/movie/day?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ TRENDING_MOVIES_DAY_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getTrendingMovies(): MovieList
 
-    @GET("3/movie/upcoming?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ UPCOMING_MOVIE_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getUpcomingMovies(): MovieList
 }
 
 interface TvApi {
-    @GET("3/trending/tv/day?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ TRENDING_TV_DAY_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getTrendingTv(): TvList
 
-    @GET("3/tv/airing_today?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ AIRING_TODAY_TV_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getAiringTodayTv(): TvList
 
     @GET("3/tv/{series_id}/images/{img_path}")
     suspend fun getTvImg(@Path("series_id") id: Int, @Path("img_path") imgPath: String): ImageResults
-
 }
 
 interface PeopleApi {
-    @GET("3/person/popular?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ POPULAR_PERSONS_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getPopularPersons(): ActorList
 
-    @GET("3/trending/person/day?language=en-US&append_to_response=details&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ TRENDING_PERSONS_DAY_PATH }?language=en-US&append_to_response=details&api_key=${ BuildConfig.API_KEY }")
     suspend fun getTrendingPersons(): ActorList
 
     @GET("3/person/{id}?language=en-US&api_key=${ BuildConfig.API_KEY }")

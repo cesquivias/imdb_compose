@@ -43,9 +43,9 @@ import retrofit2.Response
  */
 
 class HomeScreenViewModel() : ViewModel() {
-    private val movieApi = Retrofit.getInstance().create(MovieApi::class.java)
-    private val tvApi = Retrofit.getInstance().create(TvApi::class.java)
-    private val peopleApi = Retrofit.getInstance().create(PeopleApi::class.java)
+    val movieApi = Retrofit.getInstance().create(MovieApi::class.java)
+    val tvApi = Retrofit.getInstance().create(TvApi::class.java)
+    val peopleApi = Retrofit.getInstance().create(PeopleApi::class.java)
 
     val catagories: List<String> = listOf(
         "Movies of the week",

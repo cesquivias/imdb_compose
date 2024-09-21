@@ -51,6 +51,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.imdb_compose.ui.theme.Imdb_composeTheme
 import kotlinx.serialization.Serializable
 
@@ -218,14 +220,14 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                 }
 
                 when(catagory) {
-                    "Movies of the week" -> CreateMovieDetailsBox(viewModel.movieListOfWeek.collectAsState(), navController)
-                    "Trending movies" -> CreateMovieDetailsBox(viewModel.trendingMovies.collectAsState(), navController)
-                    "Upcoming movies" -> CreateMovieDetailsBox(viewModel.upcomingMovies.collectAsState(), navController)
-                    "Trending tv" -> CreateTvDetailsBox(viewModel.trendingTv.collectAsState(), navController)
-                    "Tv airing today" -> CreateTvDetailsBox(viewModel.airingTodayTv.collectAsState(), navController)
-                    "Popular actors" -> CreatePersonDetailsBox(viewModel.popularPersons.collectAsState(), navController)
-                    "Trending people" -> CreatePersonDetailsBox(viewModel.trendingPersons.collectAsState(), navController)
-                    else -> CreateMovieDetailsBox(viewModel.noMovies.collectAsState(), navController)
+                    "Movies of the week" -> CreateMovieDetailsBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
+                    "Trending movies" -> CreateMovieDetailsBox(catagory, viewModel.trendingMovies.collectAsState(), viewModel, navController)
+                    "Upcoming movies" -> CreateMovieDetailsBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
+                    "Trending tv" -> CreateTvDetailsBox(catagory, viewModel.trendingTv.collectAsState(), navController)
+                    "Tv airing today" -> CreateTvDetailsBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
+                    "Popular actors" -> CreatePersonDetailsBox(catagory, viewModel.popularPersons.collectAsState(), navController)
+                    "Trending people" -> CreatePersonDetailsBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
+                    else -> CreateMovieDetailsBox(catagory, viewModel.noMovies.collectAsState(), viewModel, navController)
                 }
             }
         }
@@ -234,63 +236,62 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
 }
 
 @Composable
-fun CreateMovieDetailsBox(movies: State<MovieList?>, navController: NavController) {
+fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel: HomeScreenViewModel, navController: NavController) {
     LazyRow {
         movies.value?.results?.forEachIndexed { i, movie ->
-            item {
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    Box (
-                        modifier = Modifier
-                            .width(125.dp)
-                            .height(175.dp)
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
-                            .padding(end = 8.dp)
-                            .clickable { navController.navigate(Navigator.MovieDetailsPage(movie.title)) },
-                        contentAlignment = Alignment.TopStart
-                    ) {
-                        Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
-                            Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
-                        }
-                        Text(
-                            text = movie.title,
-                            softWrap = false,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                    Box (
-                        modifier = Modifier
-                            .width(125.dp)
-                            .height(100.dp)
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
-                            .padding(end = 8.dp),
-                        contentAlignment = Alignment.TopStart
-                    ) {
-                        Box(
-                            modifier = Modifier.padding(4.dp)
-                        ) {
-                            Column (
-                                modifier = Modifier.fillMaxHeight(),
-                                verticalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                Text(
-                                    text = "${ i + 1 }",
-                                    modifier = Modifier,
-                                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+            if (i <= 3) {
+                item {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                        Box (
+                            modifier = Modifier
+                                .width(125.dp)
+                                .height(175.dp)
+                                .border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.outline
                                 )
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-                                    Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
+                                .padding(end = 8.dp)
+                                .clickable { navController.navigate(Navigator.MovieDetailsPage(movie.title)) },
+                            contentAlignment = Alignment.TopStart
+                        ) {
+                            Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
+                                Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
+                            }
+                            val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ movie.poster_path }"
+                            SubcomposeAsyncImage(model = imageUrl, contentDescription = "${ catagory } ${ movie.title }", loading = { isLoading() })
+                        }
+                        Box (
+                            modifier = Modifier
+                                .width(125.dp)
+                                .height(100.dp)
+                                .border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                                .padding(end = 8.dp),
+                            contentAlignment = Alignment.TopStart
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(4.dp)
+                            ) {
+                                Column (
+                                    modifier = Modifier.fillMaxHeight(),
+                                    verticalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Text(
+                                        text = "${ i + 1 }",
+                                        modifier = Modifier,
+                                        fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                                    )
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
+                                        Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
+                                    }
+                                    Text(text = movie.title)
                                 }
-                                Text(text = movie.title)
                             }
                         }
                     }
@@ -301,7 +302,7 @@ fun CreateMovieDetailsBox(movies: State<MovieList?>, navController: NavControlle
 }
 
 @Composable
-fun CreatePersonDetailsBox(persons: State<ActorList?>, navController: NavController) {
+fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navController: NavController) {
     LazyRow {
         persons.value?.results?.forEachIndexed { i, person ->
             item {
@@ -329,11 +330,8 @@ fun CreatePersonDetailsBox(persons: State<ActorList?>, navController: NavControl
                         Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
                             Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "favorite")
                         }
-                        Text(
-                            text = person.name,
-                            softWrap = false,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
+                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
+                        SubcomposeAsyncImage(model = imageUrl, contentDescription = "${ catagory } ${ person.name }", loading = { isLoading() })
                     }
                     Box (
                         modifier = Modifier
@@ -375,7 +373,7 @@ fun CreatePersonDetailsBox(persons: State<ActorList?>, navController: NavControl
 }
 
 @Composable
-fun CreateTvDetailsBox(tvShows: State<TvList?>, navController: NavController) {
+fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController: NavController) {
     LazyRow {
         tvShows.value?.results?.forEachIndexed { i, show ->
             item {
@@ -396,12 +394,8 @@ fun CreateTvDetailsBox(tvShows: State<TvList?>, navController: NavController) {
                         Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
                             Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
                         }
-                        Text(
-                            text = show.name,
-                            softWrap = false,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-
+                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ show.backdrop_path }"
+                        SubcomposeAsyncImage(model = imageUrl, contentDescription = "${ catagory } ${ show.name }", loading = { isLoading() })
                     }
                     Box (
                         modifier = Modifier
@@ -444,5 +438,7 @@ fun CreateTvDetailsBox(tvShows: State<TvList?>, navController: NavController) {
 
 @Composable
 fun isLoading() {
-    CircularProgressIndicator(modifier = Modifier.fillMaxSize().padding(128.dp), color = MaterialTheme.colorScheme.outline)
+    CircularProgressIndicator(modifier = Modifier
+        .fillMaxSize()
+        .padding(128.dp), color = MaterialTheme.colorScheme.outline)
 }

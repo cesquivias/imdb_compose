@@ -26,10 +26,12 @@ android {
         properties.load(authPropertiesFile.inputStream())
 
         val api_key = properties.getProperty("API_KEY") ?: ""
-        val api_read_acces_token = properties.getProperty("API_READ_ACCESS_TOKEN") ?: ""
+        val api_read_access_token = properties.getProperty("API_READ_ACCESS_TOKEN") ?: ""
+        val base_url = properties.getProperty("BASE_URL") ?: ""
 
         buildConfigField(type = "String", name = "API_KEY", value = api_key)
-        buildConfigField(type = "String", name = "api_read_acces_token", value = api_read_acces_token)
+        buildConfigField(type = "String", name = "API_READ_ACCESS_TOKEN", value = api_read_access_token)
+        buildConfigField(type = "String", name = "BASE_URL", value = base_url)
 
         vectorDrawables {
             useSupportLibrary = true
