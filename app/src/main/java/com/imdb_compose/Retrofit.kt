@@ -23,15 +23,16 @@ object Retrofit {
     const val BASE_URL = "https://api.themoviedb.org/"
     const val BASE_IMAGE_URL = "https://image.tmdb.org/"
 
+    const val UPCOMING_MOVIE_PATH = "3/movie/upcoming"
     const val MOVIES_OF_WEEK_PATH = "3/trending/movie/week"
     const val TRENDING_MOVIES_DAY_PATH = "3/trending/movie/day"
-    const val UPCOMING_MOVIE_PATH = "3/movie/upcoming"
 
     const val TRENDING_TV_DAY_PATH = "3/trending/tv/day"
     const val AIRING_TODAY_TV_PATH = "3/tv/airing_today"
 
     const val POPULAR_PERSONS_PATH = "3/person/popular"
     const val TRENDING_PERSONS_DAY_PATH = "3/trending/person/day"
+    const val TRENDING_PERSONS_WEEK_PATH = "3/trending/person/week"
 
     const val IMAGE_PATH =  "t/p/original/"
     const val IMAGE_PATH_w500 = "t/p/w500/"

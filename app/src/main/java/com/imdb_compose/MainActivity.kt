@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,6 +46,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -245,30 +247,27 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
                     Column(modifier = Modifier.padding(bottom = 16.dp)) {
                         Box (
                             modifier = Modifier
-                                .width(125.dp)
-                                .height(175.dp)
-                                .border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
+                                .width(155.dp)
+                                .height(210.dp)
                                 .padding(end = 8.dp)
                                 .clickable { navController.navigate(Navigator.MovieDetailsPage(movie.title)) },
                             contentAlignment = Alignment.TopStart
                         ) {
+                            val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ movie.poster_path }"
+                            SubcomposeAsyncImage(
+                                model = imageUrl,
+                                modifier = Modifier.fillMaxSize().aspectRatio(2f / 3f, true),
+                                contentDescription = "${ catagory } ${ movie.title }",
+                                loading = { isLoading() }
+                            )
                             Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
                                 Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
                             }
-                            val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ movie.poster_path }"
-                            SubcomposeAsyncImage(model = imageUrl, contentDescription = "${ catagory } ${ movie.title }", loading = { isLoading() })
                         }
                         Box (
                             modifier = Modifier
-                                .width(125.dp)
-                                .height(100.dp)
-                                .border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
+                                .width(155.dp)
+                                .height(210.dp)
                                 .padding(end = 8.dp),
                             contentAlignment = Alignment.TopStart
                         ) {
@@ -312,10 +311,6 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                         modifier = Modifier
                             .width(175.dp)
                             .height(225.dp)
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
                             .padding(end = 8.dp)
                             .clickable {
                                 navController.navigate(
@@ -327,20 +322,22 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                             },
                         contentAlignment = Alignment.BottomStart
                     ) {
+                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
+                        SubcomposeAsyncImage(
+                            model = imageUrl,
+                            modifier = Modifier.fillMaxSize().aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
+                            contentScale = ContentScale.Fit ,
+                            contentDescription = "${ catagory } ${ person.name }",
+                            loading = { isLoading() }
+                        )
                         Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
                             Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "favorite")
                         }
-                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
-                        SubcomposeAsyncImage(model = imageUrl, contentDescription = "${ catagory } ${ person.name }", loading = { isLoading() })
                     }
                     Box (
                         modifier = Modifier
                             .width(175.dp)
                             .height(125.dp)
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
                             .padding(end = 8.dp),
                         contentAlignment = Alignment.TopStart
                     ) {
@@ -379,32 +376,31 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
             item {
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    Box (
-                        modifier = Modifier
-                            .width(125.dp)
-                            .height(175.dp)
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
-                            .padding(end = 8.dp)
-                            .clickable { navController.navigate(Navigator.TvDetailsPage(show.name)) },
+                    Box (modifier = Modifier
+                        .width(155.dp)
+                        .height(210.dp)
+                        .padding(end = 8.dp)
+                        .clickable { navController.navigate(Navigator.TvDetailsPage(show.name)) },
                         contentAlignment = Alignment.TopStart
                     ) {
+                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ if (show.backdrop_path?.isEmpty() == true) show.backdrop_path else { show.poster_path } }"
+                        SubcomposeAsyncImage(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .aspectRatio(ratio = 2f / 3f, matchHeightConstraintsFirst = true),
+                            contentScale = ContentScale.Fit,
+                            model = imageUrl,
+                            contentDescription = "${ catagory } ${ show.name }",
+                            loading = { isLoading() }
+                        )
                         Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
                             Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
                         }
-                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ show.backdrop_path }"
-                        SubcomposeAsyncImage(model = imageUrl, contentDescription = "${ catagory } ${ show.name }", loading = { isLoading() })
                     }
                     Box (
                         modifier = Modifier
-                            .width(125.dp)
+                            .width(150.dp)
                             .height(100.dp)
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.outline
-                            )
                             .padding(end = 8.dp),
                         contentAlignment = Alignment.TopStart
                     ) {
