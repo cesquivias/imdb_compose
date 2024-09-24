@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 class CatagoryPageViewModel(category: String) : ViewModel() {
     val BASE_URL = "https://api.themoviedb.org/"
 
-    private val movieApit = Retrofit.getInstance().create(MovieApi::class.java)
+    private val movieApi = Retrofit.getInstance().create(MovieApi::class.java)
     private val tvApi = Retrofit.getInstance().create(TvApi::class.java)
 
     private val _trendingTv: MutableStateFlow<TvList?> = MutableStateFlow(null)

@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
@@ -41,12 +43,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -55,7 +62,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
-import com.imdb_compose.ui.theme.Imdb_composeTheme
+import com.example.compose.AppTheme
+//import com.imdb_compose.ui.theme.Imdb_composeTheme
 import kotlinx.serialization.Serializable
 
 interface Navigator {
@@ -76,9 +84,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Imdb_composeTheme {
+//            window.statusBarColor = getColor(R.color.black)
+            window.navigationBarColor = getColor(R.color.black)
+            AppTheme () {
                 Surface(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.secondary
                 ) {
                     val navController = rememberNavController()
                     val viewModel = HomeScreenViewModel()
@@ -120,6 +131,7 @@ fun HomeScreen(
 ) {
     Scaffold (
         modifier = Modifier.fillMaxSize(),
+        containerColor = Color.Transparent,
         topBar = {
             top()
         },
@@ -146,8 +158,21 @@ fun HomeScreen(
 fun TopBarNoNav() {
     TopAppBar(
         title = {
-            Text(text = "What to watch")
-        }
+            Text(
+                text = "What to watch",
+                color = MaterialTheme.colorScheme.onSecondary,
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                fontStyle = MaterialTheme.typography.headlineLarge.fontStyle,
+                fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
+            )
+        },
+        colors = TopAppBarColors(
+            containerColor = Color.Transparent,
+            titleContentColor = TopAppBarDefaults.topAppBarColors().titleContentColor,
+            actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor,
+            scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
+            navigationIconContentColor = TopAppBarDefaults.topAppBarColors().navigationIconContentColor
+        )
     )
 }
 
@@ -160,13 +185,26 @@ fun TopBarWithBackBtn(
     TopAppBar(
         modifier = Modifier,
         title = {
-            Text(text = title)
+            Text(
+                text = title,
+                color = MaterialTheme.colorScheme.onSecondary,
+                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
+                fontStyle = MaterialTheme.typography.headlineLarge.fontStyle,
+                fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
+            )
         },
         navigationIcon = {
             IconButton(onClick = { backBtn() }) {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back")
             }
-        }
+        },
+        colors = TopAppBarColors(
+            containerColor = Color.Transparent,
+            titleContentColor = TopAppBarDefaults.topAppBarColors().titleContentColor,
+            actionIconContentColor = TopAppBarDefaults.topAppBarColors().actionIconContentColor,
+            scrolledContainerColor = TopAppBarDefaults.topAppBarColors().scrolledContainerColor,
+            navigationIconContentColor = TopAppBarDefaults.topAppBarColors().navigationIconContentColor
+        )
     )
 }
 
@@ -191,7 +229,8 @@ fun BottomBar(navController: NavController) {
                     }
                 }
             }
-        }
+        },
+        containerColor = Color.Transparent
     )
 }
 
@@ -209,15 +248,42 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = catagory,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                    TextButton(
-                        modifier = Modifier.padding(start = 8.dp),
-                        onClick = { navController.navigate(Navigator.CategoryPage(catagory = catagory)) }
-                    ) {
-                        Text(text = "see all")
+                    Row (verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .clip(RoundedCornerShape(100f))
+                                .border(
+                                    2.dp,
+                                    color = Color.Yellow
+                                )
+                                .height(28.dp)
+                                .width(8.dp)
+                                .background(Color.Yellow)
+                        )
+                        Text(
+                            text = catagory,
+                            modifier = Modifier.padding(start = 8.dp),
+                            color = MaterialTheme.colorScheme.onSecondary,
+                            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                            fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
+                            fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
+                        )
+                    }
+                    Row (verticalAlignment = Alignment.CenterVertically) {
+                        TextButton(
+                            modifier = Modifier.padding(start = 8.dp),
+                            onClick = { navController.navigate(Navigator.CategoryPage(catagory = catagory)) }
+                        ) {
+                            Text(
+                                text = "see all",
+                                modifier = Modifier.padding(start = 8.dp),
+                                color = Color.Blue,
+                                fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                                fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
+                                fontWeight = MaterialTheme.typography.headlineSmall.fontWeight
+                            )
+                        }
                     }
                 }
 
@@ -241,56 +307,56 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
 fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel: HomeScreenViewModel, navController: NavController) {
     LazyRow {
         movies.value?.results?.forEachIndexed { i, movie ->
-            if (i <= 3) {
-                item {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                        Box (
+            item {
+                Spacer(modifier = Modifier.width(8.dp))
+                Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                    Box (
+                        modifier = Modifier
+                            .width(155.dp)
+                            .height(210.dp)
+                            .padding(end = 8.dp)
+                            .clickable { navController.navigate(Navigator.MovieDetailsPage(movie.title)) },
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ movie.poster_path }"
+                        SubcomposeAsyncImage(
+                            model = imageUrl,
                             modifier = Modifier
-                                .width(155.dp)
-                                .height(210.dp)
-                                .padding(end = 8.dp)
-                                .clickable { navController.navigate(Navigator.MovieDetailsPage(movie.title)) },
-                            contentAlignment = Alignment.TopStart
-                        ) {
-                            val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ movie.poster_path }"
-                            SubcomposeAsyncImage(
-                                model = imageUrl,
-                                modifier = Modifier.fillMaxSize().aspectRatio(2f / 3f, true),
-                                contentDescription = "${ catagory } ${ movie.title }",
-                                loading = { isLoading() }
-                            )
-                            Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
-                                Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
-                            }
+                                .fillMaxSize()
+                                .aspectRatio(2f / 3f, true),
+                            contentDescription = "${ catagory } ${ movie.title }",
+                            loading = { isLoading() }
+                        )
+                        Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
+                            Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
                         }
-                        Box (
-                            modifier = Modifier
-                                .width(155.dp)
-                                .height(210.dp)
-                                .padding(end = 8.dp),
-                            contentAlignment = Alignment.TopStart
+                    }
+                    Box (
+                        modifier = Modifier
+                            .width(155.dp)
+                            .height(210.dp)
+                            .padding(end = 8.dp),
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        Box(
+                            modifier = Modifier.padding(4.dp)
                         ) {
-                            Box(
-                                modifier = Modifier.padding(4.dp)
+                            Column (
+                                modifier = Modifier.fillMaxHeight(),
+                                verticalArrangement = Arrangement.SpaceEvenly
                             ) {
-                                Column (
-                                    modifier = Modifier.fillMaxHeight(),
-                                    verticalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    Text(
-                                        text = "${ i + 1 }",
-                                        modifier = Modifier,
-                                        fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-                                    )
-                                    Row(modifier = Modifier.fillMaxWidth()) {
-                                        Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-                                        Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
-                                    }
-                                    Text(text = movie.title)
+                                Text(
+                                    text = "${ i + 1 }",
+                                    modifier = Modifier,
+                                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                                )
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
+                                    Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
                                 }
+                                Text(text = movie.title)
                             }
                         }
                     }
@@ -325,7 +391,9 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                         val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
                         SubcomposeAsyncImage(
                             model = imageUrl,
-                            modifier = Modifier.fillMaxSize().aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
                             contentScale = ContentScale.Fit ,
                             contentDescription = "${ catagory } ${ person.name }",
                             loading = { isLoading() }
@@ -434,7 +502,102 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
 
 @Composable
 fun isLoading() {
-    CircularProgressIndicator(modifier = Modifier
-        .fillMaxSize()
-        .padding(128.dp), color = MaterialTheme.colorScheme.outline)
+    CircularProgressIndicator(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(128.dp),
+        color = MaterialTheme.colorScheme.outline
+    )
+}
+
+
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+fun SurfacePreview() {
+    AppTheme () {
+        Surface (
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.scrim
+        ) {
+            Scaffold (
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    TopBarNoNav()
+                },
+                bottomBar = {
+                    BottomAppBar(
+                        modifier = Modifier.fillMaxWidth(),
+                        actions = {
+                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                                    IconButton(onClick = {}) {
+                                        Icon(imageVector = Icons.Default.Home, contentDescription = "home")
+                                    }
+                                    IconButton(onClick = {}) {
+                                        Icon(imageVector = Icons.Default.Search, contentDescription = "search")
+                                    }
+                                    IconButton(onClick = {}) {
+                                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "home")
+                                    }
+                                    IconButton(onClick = {}) {
+                                        Icon(imageVector = Icons.Default.Person, contentDescription = "profile")
+                                    }
+                                }
+                            }
+                        }
+                    )
+                },
+                containerColor = Color.Transparent
+            ) { paddingValues ->
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(paddingValues)
+                        .border(width = 1.dp, color = MaterialTheme.colorScheme.outline)
+                ) {
+                    Column {
+                        Row (
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Row {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .clip(RoundedCornerShape(100f))
+                                        .border(2.dp, color = Color.Yellow)
+                                        .height(32.dp)
+                                        .width(8.dp)
+                                        .background(Color.Yellow)
+                                )
+                                Text(
+                                    text = "catagory",
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    color = MaterialTheme.colorScheme.onSecondary,
+                                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                                    fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
+                                    fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
+                                )
+                            }
+                            TextButton(
+                                modifier = Modifier.padding(start = 8.dp),
+                                onClick = {}
+                            ) {
+                                Text(
+                                    text = "see all",
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    color = Color.Blue,
+                                    fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                                    fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
+                                    fontWeight = MaterialTheme.typography.headlineSmall.fontWeight
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
