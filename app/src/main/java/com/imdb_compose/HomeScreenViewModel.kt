@@ -48,9 +48,9 @@ class HomeScreenViewModel() : ViewModel() {
     val peopleApi = Retrofit.getInstance().create(PeopleApi::class.java)
 
     val catagories: List<String> = listOf(
+        "Popular actors",
         "Trending tv",
         "Tv airing today",
-        "Popular actors",
         "Movies of the week",
         "Trending movies",
         "Upcoming movies",
