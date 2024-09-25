@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -18,10 +19,12 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -50,10 +53,15 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -237,17 +245,14 @@ fun BottomBar(navController: NavController) {
 @Composable
 fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavController) {
     viewModel.catagories.forEachIndexed { i, catagory ->
-        Row (
-            modifier = Modifier
-                .fillMaxWidth()
-                .border(width = 1.dp, color = MaterialTheme.colorScheme.outline)
-        ) {
+        Row (modifier = Modifier.fillMaxWidth()) {
             Column {
                 Row (
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Yellow Accent <Catagory>
                     Row (verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
@@ -270,6 +275,7 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                             fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
                         )
                     }
+                    // See All Btn
                     Row (verticalAlignment = Alignment.CenterVertically) {
                         TextButton(
                             modifier = Modifier.padding(start = 8.dp),
@@ -286,20 +292,20 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                         }
                     }
                 }
-
+                Spacer(modifier = Modifier.height(8.dp))
                 when(catagory) {
-                    "Movies of the week" -> CreateMovieDetailsBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
-                    "Trending movies" -> CreateMovieDetailsBox(catagory, viewModel.trendingMovies.collectAsState(), viewModel, navController)
-                    "Upcoming movies" -> CreateMovieDetailsBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
-                    "Trending tv" -> CreateTvDetailsBox(catagory, viewModel.trendingTv.collectAsState(), navController)
-                    "Tv airing today" -> CreateTvDetailsBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
+//                    "Movies of the week" -> CreateMovieDetailsBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
+//                    "Trending movies" -> CreateMovieDetailsBox(catagory, viewModel.trendingMovies.collectAsState(), viewModel, navController)
+//                    "Upcoming movies" -> CreateMovieDetailsBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
+//                    "Trending tv" -> CreateTvDetailsBox(catagory, viewModel.trendingTv.collectAsState(), navController)
+//                    "Tv airing today" -> CreateTvDetailsBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
                     "Popular actors" -> CreatePersonDetailsBox(catagory, viewModel.popularPersons.collectAsState(), navController)
-                    "Trending people" -> CreatePersonDetailsBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
+//                    "Trending people" -> CreatePersonDetailsBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
                     else -> CreateMovieDetailsBox(catagory, viewModel.noMovies.collectAsState(), viewModel, navController)
                 }
             }
         }
-        Spacer(modifier = Modifier.height(16.dp))
+//        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -371,67 +377,132 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
     LazyRow {
         persons.value?.results?.forEachIndexed { i, person ->
             item {
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    Box (
-                        modifier = Modifier
-                            .width(175.dp)
-                            .height(225.dp)
-                            .padding(end = 8.dp)
-                            .clickable {
-                                navController.navigate(
-                                    Navigator.PersonDetailsPage(
-                                        person.name,
-                                        person.id
-                                    )
+                Box (
+                    modifier = Modifier
+                        .width(200.dp)
+                        .height(320.dp)
+                        .padding(end = 8.dp)
+                        .clickable {
+                            navController.navigate(
+                                Navigator.PersonDetailsPage(
+                                    person.name,
+                                    person.id
                                 )
-                            },
-                        contentAlignment = Alignment.BottomStart
-                    ) {
-                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
-                        SubcomposeAsyncImage(
-                            model = imageUrl,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
-                            contentScale = ContentScale.Fit ,
-                            contentDescription = "${ catagory } ${ person.name }",
-                            loading = { isLoading() }
-                        )
-                        Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
-                            Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "favorite")
+                            )
                         }
-                    }
-                    Box (
+                ) {
+                    val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
+                    SubcomposeAsyncImage(
+                        model = imageUrl,
                         modifier = Modifier
-                            .width(175.dp)
-                            .height(125.dp)
-                            .padding(end = 8.dp),
-                        contentAlignment = Alignment.TopStart
-                    ) {
-                        Box(
-                            modifier = Modifier.padding(4.dp)
-                        ) {
-                            Column (
-                                modifier = Modifier.fillMaxHeight(),
-                                verticalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                Text(
-                                    text = person.original_name,
-                                    modifier = Modifier,
-                                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-                                )
-                                Text(text = person.known_for_department)
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-                                    Text(modifier = Modifier.padding(start = 8.dp), text = person.popularity)
-                                }
-                            }
-                        }
-                    }
+                            .fillMaxSize()
+                            .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
+                        contentScale = ContentScale.Fit ,
+                        contentDescription = "${ catagory } ${ person.name }",
+                        loading = { isLoading() }
+                    )
                 }
+//                Column(modifier = Modifier) {
+//                    Box (
+//                        modifier = Modifier
+//                            .width(200.dp)
+//                            .height(320.dp)
+//                            .padding(end = 8.dp)
+//                            .clickable {
+//                                navController.navigate(
+//                                    Navigator.PersonDetailsPage(
+//                                        person.name,
+//                                        person.id
+//                                    )
+//                                )
+//                            }
+//                    ) {
+//                        // Top Half - Picture
+//                        val gray100 = Color(0xff383d39)
+//                        val gray200 = Color(0xff1e211f)
+//                        Box(
+//                            Modifier
+//                                .fillMaxSize()
+//                                .offset { IntOffset(0, -20) }
+//                                .blur(10.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+//                                .background(Color.White, RectangleShape)
+//                        )
+//
+//                        Box(
+//                            Modifier
+//                                .fillMaxSize()
+//                                .offset { IntOffset(0, 20) }
+//                                .blur(10.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+//                                .background(Color.Black.copy(alpha = .2f), RectangleShape)
+//                        )
+//                        Column {
+//                            Box(
+//                                modifier = Modifier
+//                                    .fillMaxSize()
+//                                    .weight(1f)
+//                                    .background(gray100)
+//                            ) {
+//                                Box(
+//                                    Modifier
+//                                        .fillMaxSize()
+//                                        .background(
+//                                            brush = Brush.verticalGradient(
+//                                                colors = listOf(
+//                                                    gray100,
+//                                                    gray200,
+//                                                )
+//                                            ),
+//                                            shape = RectangleShape
+//                                        )
+//                                ) {
+//                                    val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
+//                                    SubcomposeAsyncImage(
+//                                        model = imageUrl,
+//                                        modifier = Modifier
+//                                            .fillMaxSize()
+//                                            .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
+//                                        contentScale = ContentScale.Fit ,
+//                                        contentDescription = "${ catagory } ${ person.name }",
+//                                        loading = { isLoading() }
+//                                    )
+//                                    Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
+//                                        Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "favorite")
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                    // Bottom Half - Descrition
+//                    Box (
+//                        modifier = Modifier
+//                            .width(175.dp)
+//                            .height(125.dp)
+//                            .padding(end = 8.dp),
+//                        contentAlignment = Alignment.TopStart
+//                    ) {
+//                        Box(
+//                            modifier = Modifier.padding(4.dp)
+//                        ) {
+//                            Column (
+//                                modifier = Modifier.fillMaxHeight(),
+//                                verticalArrangement = Arrangement.SpaceEvenly
+//                            ) {
+//                                Text(
+//                                    text = person.original_name,
+//                                    modifier = Modifier,
+//                                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+//                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+//                                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+//                                )
+//                                Text(text = person.known_for_department)
+//                                Row(modifier = Modifier.fillMaxWidth()) {
+//                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
+//                                    Text(modifier = Modifier.padding(start = 8.dp), text = person.popularity)
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
             }
         }
     }
@@ -550,49 +621,107 @@ fun SurfacePreview() {
                 },
                 containerColor = Color.Transparent
             ) { paddingValues ->
-                Row (
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(paddingValues)
-                        .border(width = 1.dp, color = MaterialTheme.colorScheme.outline)
-                ) {
-                    Column {
-                        Row (
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Row {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(start = 8.dp)
-                                        .clip(RoundedCornerShape(100f))
-                                        .border(2.dp, color = Color.Yellow)
-                                        .height(32.dp)
-                                        .width(8.dp)
-                                        .background(Color.Yellow)
-                                )
-                                Text(
-                                    text = "catagory",
-                                    modifier = Modifier.padding(start = 8.dp),
-                                    color = MaterialTheme.colorScheme.onSecondary,
-                                    fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                                    fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
-                                    fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
-                                )
-                            }
-                            TextButton(
-                                modifier = Modifier.padding(start = 8.dp),
-                                onClick = {}
+                Column {
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(paddingValues)
+                            .border(width = 1.dp, color = MaterialTheme.colorScheme.outline)
+                    ) {
+                        Column {
+                            Row (
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = "see all",
+                                Row {
+                                    // Yellow
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(start = 8.dp)
+                                            .clip(RoundedCornerShape(100f))
+                                            .border(2.dp, color = Color.Yellow)
+                                            .height(32.dp)
+                                            .width(8.dp)
+                                            .background(Color.Yellow)
+                                    )
+                                    Text(
+                                        text = "catagory",
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        color = MaterialTheme.colorScheme.onSecondary,
+                                        fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                                        fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
+                                        fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
+                                    )
+                                }
+                                // see all
+                                TextButton(
                                     modifier = Modifier.padding(start = 8.dp),
-                                    color = Color.Blue,
-                                    fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                                    fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
-                                    fontWeight = MaterialTheme.typography.headlineSmall.fontWeight
-                                )
+                                    onClick = {}
+                                ) {
+                                    Text(
+                                        text = "see all",
+                                        modifier = Modifier.padding(start = 8.dp),
+                                        color = Color.Blue,
+                                        fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                                        fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
+                                        fontWeight = MaterialTheme.typography.headlineSmall.fontWeight
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
+                        Box (
+                            modifier = Modifier
+                                .width(175.dp)
+                                .height(225.dp)
+                                .padding(end = 8.dp)
+                                .clickable {}
+                                .border(width = 2.dp, color = Color.White),
+                            contentAlignment = Alignment.BottomStart
+                        ) {
+                            val imageUrl = "https://image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.png"
+                            SubcomposeAsyncImage(
+                                model = imageUrl,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
+                                contentScale = ContentScale.Fit ,
+                                contentDescription = "content description",
+                                loading = { isLoading() }
+                            )
+                            Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
+                                Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "favorite")
+                            }
+                        }
+                        Box (
+                            modifier = Modifier
+                                .width(175.dp)
+                                .height(125.dp)
+                                .padding(end = 8.dp),
+                            contentAlignment = Alignment.TopStart
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(4.dp)
+                            ) {
+                                Column (
+                                    modifier = Modifier.fillMaxHeight(),
+                                    verticalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Text(
+                                        text = "person.original_name",
+                                        modifier = Modifier,
+                                        fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                                    )
+                                    Text(text = "person.known_for_department")
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
+                                        Text(modifier = Modifier.padding(start = 8.dp), text = "9.99")
+                                    }
+                                }
                             }
                         }
                     }
