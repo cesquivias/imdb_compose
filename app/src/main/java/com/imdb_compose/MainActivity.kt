@@ -1,6 +1,7 @@
 package com.imdb_compose
 
 import android.annotation.SuppressLint
+import android.graphics.BlurMaskFilter
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -56,11 +57,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Paint
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -372,16 +378,47 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
     }
 }
 
+@SuppressLint("SuspiciousModifierThen")
+fun Modifier.shadow(
+    color: Color = Color.Black,
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = 0.dp,
+    blurRadius: Dp = 0.dp,
+) = then(
+    drawBehind {
+        drawIntoCanvas { canvas ->
+            val paint = Paint()
+            val frameworkPaint = paint.asFrameworkPaint()
+            if (blurRadius != 0.dp) {
+                frameworkPaint.maskFilter = (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
+            }
+            frameworkPaint.color = color.toArgb()
+            val leftPixel = offsetX.toPx()
+            val topPixel = offsetY.toPx()
+            val rightPixel = size.width + topPixel
+            val bottomPixel = size.height + leftPixel
+
+            canvas.drawRect(
+                left = leftPixel,
+                top = topPixel,
+                right = rightPixel,
+                bottom = bottomPixel,
+                paint = paint,
+            )
+        }
+    }
+)
+
 @Composable
 fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navController: NavController) {
     LazyRow {
         persons.value?.results?.forEachIndexed { i, person ->
             item {
-                Box (
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .width(200.dp)
-                        .height(320.dp)
-                        .padding(end = 8.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(Color.Black)
                         .clickable {
                             navController.navigate(
                                 Navigator.PersonDetailsPage(
@@ -391,17 +428,39 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                             )
                         }
                 ) {
-                    val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
-                    SubcomposeAsyncImage(
-                        model = imageUrl,
+                    val gray100 = Color(0xff383d39)
+                    val gray200 = Color(0xff1e211f)
+                    Box (
                         modifier = Modifier
-                            .fillMaxSize()
-                            .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
-                        contentScale = ContentScale.Fit ,
-                        contentDescription = "${ catagory } ${ person.name }",
-                        loading = { isLoading() }
-                    )
+                            .width(200.dp)
+                            .height(320.dp)
+                            .padding(end = 8.dp)
+                            .shadow(
+                                color = gray100,
+                                offsetX = (-4).dp,
+                                offsetY = (-4).dp,
+                                blurRadius = 8.dp,
+                            )
+                            .shadow(
+                                color = gray200,
+                                offsetX = (4).dp,
+                                offsetY = (4).dp,
+                                blurRadius = 8.dp,
+                            )
+                    ) {
+                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
+//                        SubcomposeAsyncImage(
+//                            model = imageUrl,
+//                            modifier = Modifier
+//                                .fillMaxSize()
+//                                .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
+//                            contentScale = ContentScale.Fit ,
+//                            contentDescription = "${ catagory } ${ person.name }",
+//                            loading = { isLoading() }
+//                        )
+                    }
                 }
+
 //                Column(modifier = Modifier) {
 //                    Box (
 //                        modifier = Modifier
