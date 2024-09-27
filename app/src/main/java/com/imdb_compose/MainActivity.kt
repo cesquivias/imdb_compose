@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.annotation.FloatRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -36,6 +38,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,12 +55,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
@@ -65,6 +70,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -98,7 +104,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-//            window.statusBarColor = getColor(R.color.black)
             window.navigationBarColor = getColor(R.color.black)
             AppTheme () {
                 Surface(
@@ -248,70 +253,134 @@ fun BottomBar(navController: NavController) {
     )
 }
 
+@SuppressLint("SuspiciousModifierThen")
+fun Modifier.shadow(
+    color: Color = Color.Black,
+    offsetX: Dp = 0.dp,
+    offsetY: Dp = 0.dp,
+    blurRadius: Dp = 0.dp,
+    blurRadiusFilter: String = "NORMAL"
+) = then(
+    drawBehind {
+        drawIntoCanvas { canvas ->
+            val paint = Paint()
+            val frameworkPaint = paint.asFrameworkPaint()
+
+            if (blurRadius != 0.dp) {
+                when (blurRadiusFilter) {
+                    "SOLID" -> frameworkPaint.maskFilter = (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.SOLID))
+                    "OUTER" -> frameworkPaint.maskFilter = (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.OUTER))
+                    "INNER" -> frameworkPaint.maskFilter = (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.INNER))
+                    else -> frameworkPaint.maskFilter = (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
+                }
+            }
+
+            frameworkPaint.color = color.toArgb()
+            val leftPixel = offsetX.toPx()
+            val topPixel = offsetY.toPx()
+
+            canvas.drawRect(
+                left = leftPixel,
+                top = topPixel,
+                right = size.width + topPixel,
+                bottom = size.height + leftPixel,
+                paint = paint,
+            )
+        }
+    }
+)
+
+val gray100 = Color(0xff555555)
+val gray200 = Color(0xff444444)
+val gray300 = Color(0xff333333)
+val gray400 = Color(0xff222222)
+val gray500 = Color(0xff111111)
+val gray600 = Color(0xff000000)
+
 @Composable
 fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavController) {
     viewModel.catagories.forEachIndexed { i, catagory ->
-        Row (modifier = Modifier.fillMaxWidth()) {
-            Column {
-                Row (
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Yellow Accent <Catagory>
-                    Row (verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clip(RoundedCornerShape(100f))
-                                .border(
-                                    2.dp,
-                                    color = Color.Yellow
-                                )
-                                .height(28.dp)
-                                .width(8.dp)
-                                .background(Color.Yellow)
-                        )
-                        Text(
-                            text = catagory,
-                            modifier = Modifier.padding(start = 8.dp),
-                            color = MaterialTheme.colorScheme.onSecondary,
-                            fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                            fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
-                            fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
-                        )
-                    }
-                    // See All Btn
-                    Row (verticalAlignment = Alignment.CenterVertically) {
-                        TextButton(
-                            modifier = Modifier.padding(start = 8.dp),
-                            onClick = { navController.navigate(Navigator.CategoryPage(catagory = catagory)) }
-                        ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(
+                    color = gray600.copy(alpha = 0.6f),
+                    offsetX = 0.dp,
+                    offsetY = 0.dp,
+                    blurRadius = 4.dp
+                )
+        ) {
+            Row (
+                modifier = Modifier
+                    .fillMaxWidth(fraction = 0.95f)
+                    .fillMaxHeight(fraction = 0.95f)
+                    .shadow(
+                        color = gray400,
+                        offsetX = 8.dp,
+                        offsetY = 8.dp,
+                        blurRadius = 4.dp,
+                        blurRadiusFilter = "SOLID"
+                    )
+            ) {
+                Column (modifier = Modifier.padding(start = 8.dp, top = 8.dp)) {
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Yellow Accent <Catagory>
+                        Row (verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(start = 8.dp)
+                                    .clip(RoundedCornerShape(24.dp))
+                                    .height(36.dp)
+                                    .width(6.dp)
+                                    .background(Color.Yellow)
+                            )
                             Text(
-                                text = "see all",
+                                text = catagory,
                                 modifier = Modifier.padding(start = 8.dp),
-                                color = Color.Blue,
-                                fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                                fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
-                                fontWeight = MaterialTheme.typography.headlineSmall.fontWeight
+                                color = MaterialTheme.colorScheme.onSecondary,
+                                fontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                                fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
+                                fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
                             )
                         }
+                        // See All Btn
+                        Row (verticalAlignment = Alignment.CenterVertically) {
+                            TextButton(
+                                modifier = Modifier.padding(start = 8.dp),
+                                onClick = { navController.navigate(Navigator.CategoryPage(catagory = catagory)) }
+                            ) {
+                                Text(
+                                    text = "see all",
+                                    modifier = Modifier.padding(start = 8.dp),
+                                    color = Color.Blue,
+                                    fontSize = MaterialTheme.typography.headlineSmall.fontSize,
+                                    fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
+                                    fontWeight = MaterialTheme.typography.headlineSmall.fontWeight
+                                )
+                            }
+                        }
                     }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                when(catagory) {
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    when(catagory) {
 //                    "Movies of the week" -> CreateMovieDetailsBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
-//                    "Trending movies" -> CreateMovieDetailsBox(catagory, viewModel.trendingMovies.collectAsState(), viewModel, navController)
+                        "Popular actors" -> CreatePersonDetailsBox(catagory, viewModel.popularPersons.collectAsState(), navController)
+                        "Trending movies" -> CreateMovieDetailsBox(catagory, viewModel.trendingMovies.collectAsState(), viewModel, navController)
 //                    "Upcoming movies" -> CreateMovieDetailsBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
 //                    "Trending tv" -> CreateTvDetailsBox(catagory, viewModel.trendingTv.collectAsState(), navController)
 //                    "Tv airing today" -> CreateTvDetailsBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
-                    "Popular actors" -> CreatePersonDetailsBox(catagory, viewModel.popularPersons.collectAsState(), navController)
 //                    "Trending people" -> CreatePersonDetailsBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
-                    else -> CreateMovieDetailsBox(catagory, viewModel.noMovies.collectAsState(), viewModel, navController)
+                        else -> CreateMovieDetailsBox(catagory, viewModel.noMovies.collectAsState(), viewModel, navController)
+                    }
                 }
             }
         }
-//        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -378,190 +447,136 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
     }
 }
 
-@SuppressLint("SuspiciousModifierThen")
-fun Modifier.shadow(
-    color: Color = Color.Black,
-    offsetX: Dp = 0.dp,
-    offsetY: Dp = 0.dp,
-    blurRadius: Dp = 0.dp,
-) = then(
-    drawBehind {
-        drawIntoCanvas { canvas ->
-            val paint = Paint()
-            val frameworkPaint = paint.asFrameworkPaint()
-            if (blurRadius != 0.dp) {
-                frameworkPaint.maskFilter = (BlurMaskFilter(blurRadius.toPx(), BlurMaskFilter.Blur.NORMAL))
-            }
-            frameworkPaint.color = color.toArgb()
-            val leftPixel = offsetX.toPx()
-            val topPixel = offsetY.toPx()
-            val rightPixel = size.width + topPixel
-            val bottomPixel = size.height + leftPixel
-
-            canvas.drawRect(
-                left = leftPixel,
-                top = topPixel,
-                right = rightPixel,
-                bottom = bottomPixel,
-                paint = paint,
-            )
-        }
-    }
-)
-
 @Composable
 fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navController: NavController) {
-    LazyRow {
-        persons.value?.results?.forEachIndexed { i, person ->
-            item {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .clip(MaterialTheme.shapes.medium)
-                        .background(Color.Black)
-                        .clickable {
-                            navController.navigate(
-                                Navigator.PersonDetailsPage(
-                                    person.name,
-                                    person.id
-                                )
-                            )
-                        }
-                ) {
-                    val gray100 = Color(0xff383d39)
-                    val gray200 = Color(0xff1e211f)
-                    Box (
+    Box(modifier = Modifier.padding(start = 8.dp)) {
+        LazyRow {
+            persons.value?.results?.forEachIndexed { i, person ->
+                item {
+                    Column(
                         modifier = Modifier
-                            .width(200.dp)
-                            .height(320.dp)
-                            .padding(end = 8.dp)
+                            .height(376.dp)
+                            .fillMaxWidth()
                             .shadow(
-                                color = gray100,
-                                offsetX = (-4).dp,
-                                offsetY = (-4).dp,
-                                blurRadius = 8.dp,
-                            )
-                            .shadow(
-                                color = gray200,
-                                offsetX = (4).dp,
-                                offsetY = (4).dp,
-                                blurRadius = 8.dp,
+                                color = gray600.copy(alpha = 0.6f),
+                                offsetX = 0.dp,
+                                offsetY = 0.dp,
+                                blurRadius = 4.dp
                             )
                     ) {
-                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
-//                        SubcomposeAsyncImage(
-//                            model = imageUrl,
-//                            modifier = Modifier
-//                                .fillMaxSize()
-//                                .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
-//                            contentScale = ContentScale.Fit ,
-//                            contentDescription = "${ catagory } ${ person.name }",
-//                            loading = { isLoading() }
-//                        )
+                        Box(
+                            modifier = Modifier
+                                .height(272.dp)
+                                .width(176.dp)
+                                .clip(
+                                    RoundedCornerShape(
+                                        topStart = 16.dp,
+                                        topEnd = 16.dp,
+                                        bottomStart = 0.dp,
+                                        bottomEnd = 0.dp
+                                    )
+                                )
+                                .shadow(
+                                    color = gray500,
+                                    offsetX = 0.dp,
+                                    offsetY = 0.dp,
+                                    blurRadius = 4.dp
+                                )
+                                .clickable {
+                                    navController.navigate(
+                                        Navigator.PersonDetailsPage(
+                                            person.name,
+                                            person.id
+                                        )
+                                    )
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .height(256.dp)
+                                    .width(160.dp)
+                                    .shadow(
+                                        color = gray600,
+                                        offsetX = 0.dp,
+                                        offsetY = 0.dp,
+                                        blurRadius = 4.dp
+                                    ),
+                                contentAlignment = Alignment.BottomStart
+                            ) {
+                                // Image
+                                val imageUrl =
+                                    "${Retrofit.BASE_IMAGE_URL}${Retrofit.IMAGE_PATH}${person.profile_path}"
+                                SubcomposeAsyncImage(
+                                    model = imageUrl,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true)
+                                        .clip(RoundedCornerShape(16.dp)),
+                                    contentScale = ContentScale.Crop,
+                                    contentDescription = "${catagory} ${person.name}",
+                                    loading = { isLoading() }
+                                )
+                                // Favorite
+                                Box(
+                                    modifier = Modifier
+                                        .padding(start = 4.dp, bottom = 4.dp)
+                                        .size(40.dp)
+                                        .clip(CircleShape)
+                                        .border(
+                                            width = 2.dp,
+                                            color = Color.Magenta,
+                                            shape = CircleShape
+                                        )
+                                        .background(gray200.copy(alpha = 0.8f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        modifier = Modifier,
+                                        imageVector = Icons.Outlined.FavoriteBorder,
+                                        contentDescription = "Favorite ${person.name}"
+                                    )
+                                }
+                            }
+                        }
+                        // Bottom Half - Descrition
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.TopStart
+                        ) {
+                            Box(
+                                modifier = Modifier.padding(start = 4.dp, top = 0.dp, bottom = 4.dp)
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxHeight().width(160.dp),
+                                    verticalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Text(
+                                        text = person.original_name,
+                                        modifier = Modifier,
+                                        fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                                        overflow = TextOverflow.Ellipsis,
+                                        softWrap = false
+                                    )
+                                    Text(text = person.known_for_department)
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Star,
+                                            contentDescription = "rating"
+                                        )
+                                        Text(
+                                            modifier = Modifier.padding(start = 8.dp),
+                                            text = person.popularity
+                                        )
+                                    }
+                                }
+                            }
+                        }
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
-
-//                Column(modifier = Modifier) {
-//                    Box (
-//                        modifier = Modifier
-//                            .width(200.dp)
-//                            .height(320.dp)
-//                            .padding(end = 8.dp)
-//                            .clickable {
-//                                navController.navigate(
-//                                    Navigator.PersonDetailsPage(
-//                                        person.name,
-//                                        person.id
-//                                    )
-//                                )
-//                            }
-//                    ) {
-//                        // Top Half - Picture
-//                        val gray100 = Color(0xff383d39)
-//                        val gray200 = Color(0xff1e211f)
-//                        Box(
-//                            Modifier
-//                                .fillMaxSize()
-//                                .offset { IntOffset(0, -20) }
-//                                .blur(10.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-//                                .background(Color.White, RectangleShape)
-//                        )
-//
-//                        Box(
-//                            Modifier
-//                                .fillMaxSize()
-//                                .offset { IntOffset(0, 20) }
-//                                .blur(10.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-//                                .background(Color.Black.copy(alpha = .2f), RectangleShape)
-//                        )
-//                        Column {
-//                            Box(
-//                                modifier = Modifier
-//                                    .fillMaxSize()
-//                                    .weight(1f)
-//                                    .background(gray100)
-//                            ) {
-//                                Box(
-//                                    Modifier
-//                                        .fillMaxSize()
-//                                        .background(
-//                                            brush = Brush.verticalGradient(
-//                                                colors = listOf(
-//                                                    gray100,
-//                                                    gray200,
-//                                                )
-//                                            ),
-//                                            shape = RectangleShape
-//                                        )
-//                                ) {
-//                                    val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ person.profile_path }"
-//                                    SubcomposeAsyncImage(
-//                                        model = imageUrl,
-//                                        modifier = Modifier
-//                                            .fillMaxSize()
-//                                            .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
-//                                        contentScale = ContentScale.Fit ,
-//                                        contentDescription = "${ catagory } ${ person.name }",
-//                                        loading = { isLoading() }
-//                                    )
-//                                    Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
-//                                        Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "favorite")
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                    // Bottom Half - Descrition
-//                    Box (
-//                        modifier = Modifier
-//                            .width(175.dp)
-//                            .height(125.dp)
-//                            .padding(end = 8.dp),
-//                        contentAlignment = Alignment.TopStart
-//                    ) {
-//                        Box(
-//                            modifier = Modifier.padding(4.dp)
-//                        ) {
-//                            Column (
-//                                modifier = Modifier.fillMaxHeight(),
-//                                verticalArrangement = Arrangement.SpaceEvenly
-//                            ) {
-//                                Text(
-//                                    text = person.original_name,
-//                                    modifier = Modifier,
-//                                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-//                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-//                                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-//                                )
-//                                Text(text = person.known_for_department)
-//                                Row(modifier = Modifier.fillMaxWidth()) {
-//                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-//                                    Text(modifier = Modifier.padding(start = 8.dp), text = person.popularity)
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
             }
         }
     }
@@ -638,154 +653,4 @@ fun isLoading() {
             .padding(128.dp),
         color = MaterialTheme.colorScheme.outline
     )
-}
-
-
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
-//@Preview(showBackground = true, showSystemUi = true)
-fun SurfacePreview() {
-    AppTheme () {
-        Surface (
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colorScheme.scrim
-        ) {
-            Scaffold (
-                modifier = Modifier.fillMaxSize(),
-                topBar = {
-                    TopBarNoNav()
-                },
-                bottomBar = {
-                    BottomAppBar(
-                        modifier = Modifier.fillMaxWidth(),
-                        actions = {
-                            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                                Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
-                                    IconButton(onClick = {}) {
-                                        Icon(imageVector = Icons.Default.Home, contentDescription = "home")
-                                    }
-                                    IconButton(onClick = {}) {
-                                        Icon(imageVector = Icons.Default.Search, contentDescription = "search")
-                                    }
-                                    IconButton(onClick = {}) {
-                                        Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "home")
-                                    }
-                                    IconButton(onClick = {}) {
-                                        Icon(imageVector = Icons.Default.Person, contentDescription = "profile")
-                                    }
-                                }
-                            }
-                        }
-                    )
-                },
-                containerColor = Color.Transparent
-            ) { paddingValues ->
-                Column {
-                    Row (
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(paddingValues)
-                            .border(width = 1.dp, color = MaterialTheme.colorScheme.outline)
-                    ) {
-                        Column {
-                            Row (
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row {
-                                    // Yellow
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(start = 8.dp)
-                                            .clip(RoundedCornerShape(100f))
-                                            .border(2.dp, color = Color.Yellow)
-                                            .height(32.dp)
-                                            .width(8.dp)
-                                            .background(Color.Yellow)
-                                    )
-                                    Text(
-                                        text = "catagory",
-                                        modifier = Modifier.padding(start = 8.dp),
-                                        color = MaterialTheme.colorScheme.onSecondary,
-                                        fontSize = MaterialTheme.typography.headlineMedium.fontSize,
-                                        fontStyle = MaterialTheme.typography.headlineMedium.fontStyle,
-                                        fontWeight = MaterialTheme.typography.headlineMedium.fontWeight
-                                    )
-                                }
-                                // see all
-                                TextButton(
-                                    modifier = Modifier.padding(start = 8.dp),
-                                    onClick = {}
-                                ) {
-                                    Text(
-                                        text = "see all",
-                                        modifier = Modifier.padding(start = 8.dp),
-                                        color = Color.Blue,
-                                        fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                                        fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
-                                        fontWeight = MaterialTheme.typography.headlineSmall.fontWeight
-                                    )
-                                }
-                            }
-                        }
-                    }
-                    Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                        Box (
-                            modifier = Modifier
-                                .width(175.dp)
-                                .height(225.dp)
-                                .padding(end = 8.dp)
-                                .clickable {}
-                                .border(width = 2.dp, color = Color.White),
-                            contentAlignment = Alignment.BottomStart
-                        ) {
-                            val imageUrl = "https://image.tmdb.org/t/p/original/wwemzKWzjKYJFfCeiB57q3r4Bcm.png"
-                            SubcomposeAsyncImage(
-                                model = imageUrl,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true),
-                                contentScale = ContentScale.Fit ,
-                                contentDescription = "content description",
-                                loading = { isLoading() }
-                            )
-                            Box(modifier = Modifier.padding(bottom = 4.dp, start = 4.dp)) {
-                                Icon(imageVector = Icons.Outlined.FavoriteBorder, contentDescription = "favorite")
-                            }
-                        }
-                        Box (
-                            modifier = Modifier
-                                .width(175.dp)
-                                .height(125.dp)
-                                .padding(end = 8.dp),
-                            contentAlignment = Alignment.TopStart
-                        ) {
-                            Box(
-                                modifier = Modifier.padding(4.dp)
-                            ) {
-                                Column (
-                                    modifier = Modifier.fillMaxHeight(),
-                                    verticalArrangement = Arrangement.SpaceEvenly
-                                ) {
-                                    Text(
-                                        text = "person.original_name",
-                                        modifier = Modifier,
-                                        fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-                                    )
-                                    Text(text = "person.known_for_department")
-                                    Row(modifier = Modifier.fillMaxWidth()) {
-                                        Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-                                        Text(modifier = Modifier.padding(start = 8.dp), text = "9.99")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
