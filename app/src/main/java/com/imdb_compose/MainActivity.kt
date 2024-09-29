@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AddBox
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.StarOutline
@@ -62,10 +63,12 @@ import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -386,60 +389,102 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
 
 @Composable
 fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel: HomeScreenViewModel, navController: NavController) {
-    LazyRow {
-        movies.value?.results?.forEachIndexed { i, movie ->
-            item {
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    Box (
+    Box(modifier = Modifier.padding(start = 8.dp)) {
+        LazyRow {
+            movies.value?.results?.forEachIndexed { i, movie ->
+                item {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Column(
                         modifier = Modifier
-                            .width(155.dp)
-                            .height(210.dp)
-                            .padding(end = 8.dp)
-                            .clickable { navController.navigate(Navigator.MovieDetailsPage(movie.title)) },
-                        contentAlignment = Alignment.TopStart
+                            .shadow(
+                                color = gray600.copy(alpha = 0.6f),
+                                offsetX = 0.dp,
+                                offsetY = 0.dp,
+                                blurRadius = 4.dp
+                            ),
                     ) {
-                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ movie.poster_path }"
-                        SubcomposeAsyncImage(
-                            model = imageUrl,
+                        Box (
                             modifier = Modifier
-                                .fillMaxSize()
-                                .aspectRatio(2f / 3f, true),
-                            contentDescription = "${ catagory } ${ movie.title }",
-                            loading = { isLoading() }
-                        )
-                        Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
-                            Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
-                        }
-                    }
-                    Box (
-                        modifier = Modifier
-                            .width(155.dp)
-                            .height(210.dp)
-                            .padding(end = 8.dp),
-                        contentAlignment = Alignment.TopStart
-                    ) {
-                        Box(
-                            modifier = Modifier.padding(4.dp)
-                        ) {
-                            Column (
-                                modifier = Modifier.fillMaxHeight(),
-                                verticalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                Text(
-                                    text = "${ i + 1 }",
-                                    modifier = Modifier,
-                                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                                .width(155.dp)
+                                .height(210.dp)
+                                .padding(end = 8.dp)
+                                .shadow(
+                                    color = gray500,
+                                    offsetX = 0.dp,
+                                    offsetY = 0.dp,
+                                    blurRadius = 4.dp
                                 )
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-                                    Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
+                                .clickable {
+                                    navController.navigate(
+                                        Navigator.MovieDetailsPage(movie.title)
+                                    )
+                                },
+                            contentAlignment = Alignment.TopStart
+                        ) {
+                            GetImageAsync(
+                                contentDescription = "${catagory} ${movie.title}",
+                                clip = false,
+                                backDropPath = if (movie.backdrop_path.isEmpty()) {
+                                    movie.backdrop_path
+                                } else {
+                                    movie.poster_path
                                 }
-                                Text(text = movie.title)
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .padding(top = 1.dp, start = 1.dp)
+                                    .size(36.dp)
+                                    .background(gray200.copy(alpha = 0.6f))
+                                    .drawBehind {
+                                        val path = Path().apply {
+                                            moveTo(75f, 125f)
+                                            lineTo(0f, 165f)
+                                            lineTo(0f, 125f)
+                                            moveTo(45f, 125f)
+                                            lineTo(125f, 125f)
+                                            lineTo(125f, 165f)
+                                            close()
+                                        }
+                                        drawPath(path, color = gray200.copy(alpha = 0.6f))
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Add,
+                                    contentDescription = "add favorite"
+                                )
                             }
                         }
+                        // details box
+//                        Box (
+//                            modifier = Modifier
+//                                .width(155.dp)
+//                                .height(210.dp)
+//                                .padding(end = 8.dp),
+//                            contentAlignment = Alignment.TopStart
+//                        ) {
+//                            Box(
+//                                modifier = Modifier.padding(4.dp)
+//                            ) {
+//                                Column (
+//                                    modifier = Modifier.fillMaxHeight(),
+//                                    verticalArrangement = Arrangement.SpaceEvenly
+//                                ) {
+//                                    Text(
+//                                        text = "${ i + 1 }",
+//                                        modifier = Modifier,
+//                                        fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
+//                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
+//                                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+//                                    )
+//                                    Row(modifier = Modifier.fillMaxWidth()) {
+//                                        Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
+//                                        Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
+//                                    }
+//                                    Text(text = movie.title)
+//                                }
+//                            }
+//                        }
                     }
                 }
             }
@@ -505,22 +550,16 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                                 contentAlignment = Alignment.BottomStart
                             ) {
                                 // Image
-                                val imageUrl =
-                                    "${Retrofit.BASE_IMAGE_URL}${Retrofit.IMAGE_PATH}${person.profile_path}"
-                                SubcomposeAsyncImage(
-                                    model = imageUrl,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .aspectRatio(5f / 8f, matchHeightConstraintsFirst = true)
-                                        .clip(RoundedCornerShape(16.dp)),
-                                    contentScale = ContentScale.Crop,
-                                    contentDescription = "${catagory} ${person.name}",
-                                    loading = { isLoading() }
+                                GetImageAsync(
+                                    contentDescription = "${ catagory } ${ person.name }",
+                                    clip = true,
+                                    aspectRatio = 5f / 8f,
+                                    backDropPath = person.profile_path
                                 )
                                 // Favorite
                                 Box(
                                     modifier = Modifier
-                                        .padding(start = 4.dp, bottom = 4.dp)
+                                        .padding(bottom = 4.dp)
                                         .size(40.dp)
                                         .clip(CircleShape)
                                         .border(
@@ -534,7 +573,7 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                                     Icon(
                                         modifier = Modifier,
                                         imageVector = Icons.Outlined.FavoriteBorder,
-                                        contentDescription = "Favorite ${person.name}"
+                                        contentDescription = "Favorite ${ person.name }"
                                     )
                                 }
                             }
@@ -548,7 +587,9 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                                 modifier = Modifier.padding(start = 4.dp, top = 0.dp, bottom = 4.dp)
                             ) {
                                 Column(
-                                    modifier = Modifier.fillMaxHeight().width(160.dp),
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(160.dp),
                                     verticalArrangement = Arrangement.SpaceEvenly
                                 ) {
                                     Text(
@@ -596,15 +637,14 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
                         .clickable { navController.navigate(Navigator.TvDetailsPage(show.name)) },
                         contentAlignment = Alignment.TopStart
                     ) {
-                        val imageUrl = "${ Retrofit.BASE_IMAGE_URL }${ Retrofit.IMAGE_PATH }${ if (show.backdrop_path?.isEmpty() == true) show.backdrop_path else { show.poster_path } }"
-                        SubcomposeAsyncImage(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .aspectRatio(ratio = 2f / 3f, matchHeightConstraintsFirst = true),
-                            contentScale = ContentScale.Fit,
-                            model = imageUrl,
+                        GetImageAsync(
                             contentDescription = "${ catagory } ${ show.name }",
-                            loading = { isLoading() }
+                            clip = false,
+                            backDropPath = if (show.backdrop_path.isEmpty()) {
+                                show.backdrop_path
+                            } else {
+                                show.poster_path
+                            }
                         )
                         Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
                             Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
@@ -646,6 +686,30 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
 }
 
 @Composable
+fun GetImageAsync(clip: Boolean, contentDescription: String, aspectRatio: Float = 2f / 3f, imgPath: String = Retrofit.IMAGE_PATH, backDropPath: String) {
+    SubcomposeAsyncImage(
+        model = "${ Retrofit.BASE_IMAGE_URL }${ imgPath }${ backDropPath }",
+        modifier = Modifier
+            .fillMaxSize()
+            .aspectRatio(2f / 3f, true)
+            .clip(
+                if (clip) {
+                    RoundedCornerShape(16.dp)
+                } else {
+                    RoundedCornerShape(0.dp)
+                }
+            ),
+        contentScale = if (clip) {
+            ContentScale.Crop
+        } else {
+            ContentScale.Fit
+        },
+        contentDescription = contentDescription,
+        loading = { isLoading() }
+    )
+}
+
+@Composable
 fun isLoading() {
     CircularProgressIndicator(
         modifier = Modifier
@@ -653,4 +717,58 @@ fun isLoading() {
             .padding(128.dp),
         color = MaterialTheme.colorScheme.outline
     )
+}
+
+@Composable
+@Preview(showBackground = true, showSystemUi = true)
+fun ShadowBoxDrawPreview() {
+    Box(
+        modifier = Modifier
+            .width(170.dp)
+            .height(225.dp)
+            .shadow(
+                color = gray400,
+                offsetX = 0.dp,
+                offsetY = 0.dp,
+                blurRadius = 4.dp
+            )
+    ) {
+        Box (
+            modifier = Modifier
+                .width(160.dp)
+                .height(206.dp)
+                .shadow(
+                    color = gray500,
+                    offsetX = 8.dp,
+                    offsetY = 2.dp,
+                    blurRadius = 4.dp
+                ),
+            contentAlignment = Alignment.TopStart
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 16.dp, start = 16.dp)
+                    .size(36.dp)
+                    .background(gray200)
+                    .drawBehind {
+                        val path = Path().apply {
+                            moveTo(65f, 90f)
+                            lineTo(0f, 125f)
+                            lineTo(0f, 90f)
+                            moveTo(35f, 90f)
+                            lineTo(99f, 90f)
+                            lineTo(99f, 125f)
+                            close()
+                        }
+                        drawPath(path, color = gray200)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = "add favorite"
+                )
+            }
+        }
+    }
 }
