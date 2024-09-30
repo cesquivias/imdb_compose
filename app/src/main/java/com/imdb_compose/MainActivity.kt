@@ -73,6 +73,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -430,6 +433,7 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
                                     movie.poster_path
                                 }
                             )
+                            // ribbon
                             Box(
                                 modifier = Modifier
                                     .padding(top = 1.dp, start = 1.dp)
@@ -437,12 +441,12 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
                                     .background(gray200.copy(alpha = 0.6f))
                                     .drawBehind {
                                         val path = Path().apply {
-                                            moveTo(75f, 125f)
-                                            lineTo(0f, 165f)
-                                            lineTo(0f, 125f)
-                                            moveTo(45f, 125f)
-                                            lineTo(125f, 125f)
-                                            lineTo(125f, 165f)
+                                            moveTo(75f, 126f)
+                                            lineTo(0f, 166f)
+                                            lineTo(0f, 126f)
+                                            moveTo(45f, 126f)
+                                            lineTo(125f, 126f)
+                                            lineTo(125f, 166f)
                                             close()
                                         }
                                         drawPath(path, color = gray200.copy(alpha = 0.6f))
@@ -456,35 +460,67 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
                             }
                         }
                         // details box
-//                        Box (
-//                            modifier = Modifier
-//                                .width(155.dp)
-//                                .height(210.dp)
-//                                .padding(end = 8.dp),
-//                            contentAlignment = Alignment.TopStart
-//                        ) {
-//                            Box(
-//                                modifier = Modifier.padding(4.dp)
-//                            ) {
-//                                Column (
-//                                    modifier = Modifier.fillMaxHeight(),
-//                                    verticalArrangement = Arrangement.SpaceEvenly
-//                                ) {
-//                                    Text(
-//                                        text = "${ i + 1 }",
-//                                        modifier = Modifier,
-//                                        fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-//                                        fontSize = MaterialTheme.typography.titleLarge.fontSize,
-//                                        fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
-//                                    )
-//                                    Row(modifier = Modifier.fillMaxWidth()) {
-//                                        Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-//                                        Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
-//                                    }
-//                                    Text(text = movie.title)
-//                                }
-//                            }
-//                        }
+                        Box (modifier = Modifier.width(155.dp)) {
+                            Box {
+                                Column (
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(start = 4.dp, top = 8.dp, bottom = 8.dp),
+                                    verticalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Star,
+                                            contentDescription = "rating",
+                                            tint = Color.Yellow
+                                        )
+                                        Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
+                                    }
+                                    Box(
+                                        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Text(text = movie.title)
+                                    }
+                                    Row (
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(end = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .clip(CircleShape)
+                                                .background(color = gray200),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(25.dp)
+                                                    .clip(CircleShape)
+                                                    .background(color = gray600),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    text = "i",
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                                    color = gray100,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -578,7 +614,7 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                                 }
                             }
                         }
-                        // Bottom Half - Descrition
+                        // Bottom Half Details
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.TopStart
@@ -605,7 +641,8 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                                     Row(modifier = Modifier.fillMaxWidth()) {
                                         Icon(
                                             imageVector = Icons.Filled.Star,
-                                            contentDescription = "rating"
+                                            contentDescription = "rating",
+                                            tint = Color.Yellow
                                         )
                                         Text(
                                             modifier = Modifier.padding(start = 8.dp),
@@ -719,56 +756,56 @@ fun isLoading() {
     )
 }
 
-@Composable
-@Preview(showBackground = true, showSystemUi = true)
-fun ShadowBoxDrawPreview() {
-    Box(
-        modifier = Modifier
-            .width(170.dp)
-            .height(225.dp)
-            .shadow(
-                color = gray400,
-                offsetX = 0.dp,
-                offsetY = 0.dp,
-                blurRadius = 4.dp
-            )
-    ) {
-        Box (
-            modifier = Modifier
-                .width(160.dp)
-                .height(206.dp)
-                .shadow(
-                    color = gray500,
-                    offsetX = 8.dp,
-                    offsetY = 2.dp,
-                    blurRadius = 4.dp
-                ),
-            contentAlignment = Alignment.TopStart
-        ) {
-            Box(
-                modifier = Modifier
-                    .padding(top = 16.dp, start = 16.dp)
-                    .size(36.dp)
-                    .background(gray200)
-                    .drawBehind {
-                        val path = Path().apply {
-                            moveTo(65f, 90f)
-                            lineTo(0f, 125f)
-                            lineTo(0f, 90f)
-                            moveTo(35f, 90f)
-                            lineTo(99f, 90f)
-                            lineTo(99f, 125f)
-                            close()
-                        }
-                        drawPath(path, color = gray200)
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "add favorite"
-                )
-            }
-        }
-    }
-}
+//@Composable
+//@Preview(showBackground = true, showSystemUi = true)
+//fun ShadowBoxDrawPreview() {
+//    Box(
+//        modifier = Modifier
+//            .width(170.dp)
+//            .height(225.dp)
+//            .shadow(
+//                color = gray400,
+//                offsetX = 0.dp,
+//                offsetY = 0.dp,
+//                blurRadius = 4.dp
+//            )
+//    ) {
+//        Box (
+//            modifier = Modifier
+//                .width(160.dp)
+//                .height(206.dp)
+//                .shadow(
+//                    color = gray500,
+//                    offsetX = 8.dp,
+//                    offsetY = 2.dp,
+//                    blurRadius = 4.dp
+//                ),
+//            contentAlignment = Alignment.TopStart
+//        ) {
+//            Box(
+//                modifier = Modifier
+//                    .padding(top = 16.dp, start = 16.dp)
+//                    .size(36.dp)
+//                    .background(gray200)
+//                    .drawBehind {
+//                        val path = Path().apply {
+//                            moveTo(65f, 90f)
+//                            lineTo(0f, 125f)
+//                            lineTo(0f, 90f)
+//                            moveTo(35f, 90f)
+//                            lineTo(99f, 90f)
+//                            lineTo(99f, 125f)
+//                            close()
+//                        }
+//                        drawPath(path, color = gray200)
+//                    },
+//                contentAlignment = Alignment.Center
+//            ) {
+//                Icon(
+//                    imageVector = Icons.Outlined.Add,
+//                    contentDescription = "add favorite"
+//                )
+//            }
+//        }
+//    }
+//}
