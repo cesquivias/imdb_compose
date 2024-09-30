@@ -374,13 +374,13 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                     Spacer(modifier = Modifier.height(8.dp))
 
                     when(catagory) {
-//                    "Movies of the week" -> CreateMovieDetailsBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
-                        "Popular actors" -> CreatePersonDetailsBox(catagory, viewModel.popularPersons.collectAsState(), navController)
+                        "Movies of the week" -> CreateMovieDetailsBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
                         "Trending movies" -> CreateMovieDetailsBox(catagory, viewModel.trendingMovies.collectAsState(), viewModel, navController)
-//                    "Upcoming movies" -> CreateMovieDetailsBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
-//                    "Trending tv" -> CreateTvDetailsBox(catagory, viewModel.trendingTv.collectAsState(), navController)
-//                    "Tv airing today" -> CreateTvDetailsBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
-//                    "Trending people" -> CreatePersonDetailsBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
+                        "Upcoming movies" -> CreateUpcommingDetailsBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
+                        "Tv airing today" -> CreateTvDetailsBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
+                        "Trending tv" -> CreateTvDetailsBox(catagory, viewModel.trendingTv.collectAsState(), navController)
+                        "Popular actors" -> CreatePersonDetailsBox(catagory, viewModel.popularPersons.collectAsState(), navController)
+                        "Trending people" -> CreatePersonDetailsBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
                         else -> CreateMovieDetailsBox(catagory, viewModel.noMovies.collectAsState(), viewModel, navController)
                     }
                 }
@@ -396,7 +396,6 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
         LazyRow {
             movies.value?.results?.forEachIndexed { i, movie ->
                 item {
-                    Spacer(modifier = Modifier.width(8.dp))
                     Column(
                         modifier = Modifier
                             .shadow(
@@ -468,6 +467,14 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
                                         .padding(start = 4.dp, top = 8.dp, bottom = 8.dp),
                                     verticalArrangement = Arrangement.SpaceEvenly
                                 ) {
+                                    if (Regex("trending").containsMatchIn(catagory.lowercase())) {
+                                        Box(
+                                            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+                                            contentAlignment = Alignment.CenterStart
+                                        ) {
+                                            Text(text = "${ i + 1 }")
+                                        }
+                                    }
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -522,6 +529,7 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
             }
         }
@@ -662,60 +670,148 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
 
 @Composable
 fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController: NavController) {
-    LazyRow {
-        tvShows.value?.results?.forEachIndexed { i, show ->
-            item {
-                Spacer(modifier = Modifier.width(8.dp))
-                Column(modifier = Modifier.padding(bottom = 16.dp)) {
-                    Box (modifier = Modifier
-                        .width(155.dp)
-                        .height(210.dp)
-                        .padding(end = 8.dp)
-                        .clickable { navController.navigate(Navigator.TvDetailsPage(show.name)) },
-                        contentAlignment = Alignment.TopStart
-                    ) {
-                        GetImageAsync(
-                            contentDescription = "${ catagory } ${ show.name }",
-                            clip = false,
-                            backDropPath = if (show.backdrop_path.isEmpty()) {
-                                show.backdrop_path
-                            } else {
-                                show.poster_path
-                            }
-                        )
-                        Box(modifier = Modifier.padding(top = 4.dp, start = 4.dp)) {
-                            Icon(imageVector = Icons.Outlined.AddBox, contentDescription = "add")
-                        }
-                    }
-                    Box (
+    Box(modifier = Modifier.padding(start = 8.dp)) {
+        LazyRow {
+            tvShows.value?.results?.forEachIndexed { i, show ->
+                item {
+                    Column(
                         modifier = Modifier
-                            .width(150.dp)
-                            .height(100.dp)
-                            .padding(end = 8.dp),
-                        contentAlignment = Alignment.TopStart
+                            .shadow(
+                                color = gray600.copy(alpha = 0.6f),
+                                offsetX = 0.dp,
+                                offsetY = 0.dp,
+                                blurRadius = 4.dp
+                            ),
                     ) {
-                        Box(
-                            modifier = Modifier.padding(4.dp)
-                        ) {
-                            Column (
-                                modifier = Modifier.fillMaxHeight(),
-                                verticalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                Text(
-                                    text = "${ i + 1 }",
-                                    modifier = Modifier,
-                                    fontFamily = MaterialTheme.typography.titleLarge.fontFamily,
-                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                    fontWeight = MaterialTheme.typography.titleLarge.fontWeight,
+                        Box (
+                            modifier = Modifier
+                                .width(155.dp)
+                                .height(210.dp)
+                                .padding(end = 8.dp)
+                                .shadow(
+                                    color = gray500,
+                                    offsetX = 0.dp,
+                                    offsetY = 0.dp,
+                                    blurRadius = 4.dp
                                 )
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    Icon(imageVector = Icons.Filled.Star, contentDescription = "rating")
-                                    Text(modifier = Modifier.padding(start = 8.dp), text = show.popularity)
+                                .clickable {
+                                    navController.navigate(
+                                        Navigator.MovieDetailsPage(show.name)
+                                    )
+                                },
+                            contentAlignment = Alignment.TopStart
+                        ) {
+                            GetImageAsync(
+                                contentDescription = "${ catagory } ${ show.name }",
+                                clip = false,
+                                backDropPath = if (show.backdrop_path.isEmpty()) {
+                                    show.backdrop_path
+                                } else {
+                                    show.poster_path
                                 }
-                                Text(text = show.original_name)
+                            )
+                            // ribbon
+                            Box(
+                                modifier = Modifier
+                                    .padding(top = 1.dp, start = 1.dp)
+                                    .size(36.dp)
+                                    .background(gray200.copy(alpha = 0.6f))
+                                    .drawBehind {
+                                        val path = Path().apply {
+                                            moveTo(75f, 126f)
+                                            lineTo(0f, 166f)
+                                            lineTo(0f, 126f)
+                                            moveTo(45f, 126f)
+                                            lineTo(125f, 126f)
+                                            lineTo(125f, 166f)
+                                            close()
+                                        }
+                                        drawPath(path, color = gray200.copy(alpha = 0.6f))
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Add,
+                                    contentDescription = "add favorite"
+                                )
+                            }
+                        }
+                        // details box
+                        Box (modifier = Modifier.width(155.dp)) {
+                            Box {
+                                Column (
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .padding(start = 4.dp, top = 8.dp, bottom = 8.dp),
+                                    verticalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    if (Regex("trending").containsMatchIn(catagory.lowercase())) {
+                                        Box(
+                                            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+                                            contentAlignment = Alignment.CenterStart
+                                        ) {
+                                            Text(text = "${ i + 1 }")
+                                        }
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(bottom = 8.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.Star,
+                                            contentDescription = "rating",
+                                            tint = Color.Yellow
+                                        )
+                                        Text(modifier = Modifier.padding(start = 8.dp), text = show.vote_average)
+                                    }
+                                    Box(
+                                        modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+                                        contentAlignment = Alignment.CenterStart
+                                    ) {
+                                        Text(
+                                            text = show.name,
+                                            overflow = TextOverflow.Ellipsis,
+                                            softWrap = false
+                                        )
+                                    }
+                                    Row (
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(end = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.End
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(32.dp)
+                                                .clip(CircleShape)
+                                                .background(color = gray200),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(25.dp)
+                                                    .clip(CircleShape)
+                                                    .background(color = gray600),
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    text = "i",
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                                                    color = gray100,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
                 }
             }
         }
@@ -723,7 +819,145 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
 }
 
 @Composable
-fun GetImageAsync(clip: Boolean, contentDescription: String, aspectRatio: Float = 2f / 3f, imgPath: String = Retrofit.IMAGE_PATH, backDropPath: String) {
+fun CreateUpcommingDetailsBox(catagory: String, movies: State<MovieList?>, viewModel: HomeScreenViewModel, navController: NavController) {
+    Box(modifier = Modifier.padding(start = 8.dp)) {
+        LazyRow {
+            movies.value?.results?.forEachIndexed { i, movie ->
+                item {
+                    Column {
+                        Row {
+                            // upcoming date
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(start = 8.dp, top = 4.dp, bottom = 12.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                //"2024-07-31"
+                                val date = movie.release_date.split("-")
+                                val monthMap = mapOf("01" to "Jan", "02" to "Feb", "03" to "Mar", "04" to "Apr", "05" to "May", "06" to "Jun", "07" to "Jul", "08" to "Aug", "09" to "Sep", "10" to "Oct", "11" to "Nov", "12" to "Dec",)
+
+                                Text(
+                                    text = "${ monthMap[date[1]] }-${ date[2] }",
+                                    fontFamily = MaterialTheme.typography.labelLarge.fontFamily,
+                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                                    fontStyle = MaterialTheme.typography.labelLarge.fontStyle,
+                                    fontWeight = MaterialTheme.typography.labelLarge.fontWeight,
+                                    color = Color.Yellow,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                        // movie & details box
+                        Column(
+                            modifier = Modifier
+                                .width(208.dp)
+                                .height(418.dp)
+                                .shadow(
+                                    color = gray600.copy(alpha = 0.6f),
+                                    offsetX = 0.dp,
+                                    offsetY = 0.dp,
+                                    blurRadius = 4.dp
+                                ),
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(200.dp)
+                                    .height(320.dp)
+                                    .shadow(
+                                        color = gray500,
+                                        offsetX = 4.dp,
+                                        offsetY = 4.dp,
+                                        blurRadius = 4.dp
+                                    )
+                                    .clickable {
+                                        navController.navigate(
+                                            Navigator.MovieDetailsPage(movie.title)
+                                        )
+                                    },
+                                contentAlignment = Alignment.TopStart
+                            ) {
+                                GetImageAsync(
+                                    contentDescription = "${catagory} ${movie.title}",
+                                    aspectRatio = 5f / 8f,
+                                    backDropPath = if (movie.backdrop_path.isEmpty()) {
+                                        movie.backdrop_path
+                                    } else {
+                                        movie.poster_path
+                                    }
+                                )
+                                // ribbon
+                                Box(
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .background(gray200.copy(alpha = 0.6f))
+                                        .drawBehind {
+                                            val path = Path().apply {
+                                                moveTo(75f, 126f)
+                                                lineTo(0f, 166f)
+                                                lineTo(0f, 126f)
+                                                moveTo(45f, 126f)
+                                                lineTo(125f, 126f)
+                                                lineTo(125f, 166f)
+                                                close()
+                                            }
+                                            drawPath(path, color = gray200.copy(alpha = 0.6f))
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Add,
+                                        contentDescription = "add favorite"
+                                    )
+                                }
+                            }
+                            // details box
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(start = 8.dp),
+                                    verticalArrangement = Arrangement.SpaceEvenly
+                                ) {
+                                    Column (
+                                        modifier = Modifier,
+                                        verticalArrangement = Arrangement.SpaceEvenly
+                                    ) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 8.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Star,
+                                                contentDescription = "rating",
+                                                tint = Color.Yellow
+                                            )
+                                            Text(
+                                                modifier = Modifier.padding(start = 8.dp),
+                                                text = movie.vote_average
+                                            )
+                                        }
+                                        Box(
+                                            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
+                                            contentAlignment = Alignment.CenterStart
+                                        ) {
+                                            Text(text = movie.title)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.width(16.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun GetImageAsync(clip: Boolean = false, contentDescription: String, aspectRatio: Float = 2f / 3f, imgPath: String = Retrofit.IMAGE_PATH, backDropPath: String) {
     SubcomposeAsyncImage(
         model = "${ Retrofit.BASE_IMAGE_URL }${ imgPath }${ backDropPath }",
         modifier = Modifier
