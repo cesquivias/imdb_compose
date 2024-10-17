@@ -55,7 +55,7 @@ class HomeScreenViewModel() : ViewModel() {
         "Movies of the week",
         "Trending movies",
         "Upcoming movies",
-    )
+    ).shuffled()
 
     val noMovies: MutableStateFlow<MovieList?> = MutableStateFlow(null)
 

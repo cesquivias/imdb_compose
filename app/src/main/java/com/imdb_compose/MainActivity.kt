@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.annotation.FloatRange
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
@@ -38,6 +40,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.AddBox
+import androidx.compose.material.icons.outlined.BookOnline
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.BottomAppBar
@@ -57,6 +60,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.currentCompositionLocalContext
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -76,10 +83,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -171,7 +180,7 @@ fun HomeScreen(
         ) {
             LazyColumn {
                 item {
-                    GenerateLazyRows(viewModel, navController)
+                    LazyRows(viewModel, navController)
                 }
             }
         }
@@ -302,9 +311,16 @@ val gray300 = Color(0xff333333)
 val gray400 = Color(0xff222222)
 val gray500 = Color(0xff111111)
 val gray600 = Color(0xff000000)
+val blue100 = Color(0xff1eeeff)
+val blue200 = Color(0xff3D76E0)
+val blue300 = Color(0xff1e90ff)
+val blue400 = Color(0xff1e32ff)
 
 @Composable
-fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavController) {
+fun LazyRows(
+    viewModel: HomeScreenViewModel,
+    navController: NavController
+) {
     viewModel.catagories.forEachIndexed { i, catagory ->
         Box(
             modifier = Modifier
@@ -360,12 +376,12 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                                 onClick = { navController.navigate(Navigator.CategoryPage(catagory = catagory)) }
                             ) {
                                 Text(
-                                    text = "see all",
+                                    text = "See all",
                                     modifier = Modifier.padding(start = 8.dp),
-                                    color = Color.Blue,
+                                    color = blue400,
                                     fontSize = MaterialTheme.typography.headlineSmall.fontSize,
                                     fontStyle = MaterialTheme.typography.headlineSmall.fontStyle,
-                                    fontWeight = MaterialTheme.typography.headlineSmall.fontWeight
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                         }
@@ -374,14 +390,15 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
                     Spacer(modifier = Modifier.height(8.dp))
 
                     when(catagory) {
-                        "Movies of the week" -> CreateMovieDetailsBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
-                        "Trending movies" -> CreateMovieDetailsBox(catagory, viewModel.trendingMovies.collectAsState(), viewModel, navController)
-                        "Upcoming movies" -> CreateUpcommingDetailsBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
-                        "Tv airing today" -> CreateTvDetailsBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
-                        "Trending tv" -> CreateTvDetailsBox(catagory, viewModel.trendingTv.collectAsState(), navController)
-                        "Popular actors" -> CreatePersonDetailsBox(catagory, viewModel.popularPersons.collectAsState(), navController)
-                        "Trending people" -> CreatePersonDetailsBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
-                        else -> CreateMovieDetailsBox(catagory, viewModel.noMovies.collectAsState(), viewModel, navController)
+                        "Top box office" -> BoxOfficeBox(catagory, viewModel.boxOffice, navController)
+                        "Upcoming movies" -> UpcommingBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
+                        "Tv airing today" -> TvBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
+                        "Trending tv" -> TvBox(catagory, viewModel.trendingTv.collectAsState(), navController)
+                        "Popular actors" -> PersonBox(catagory, viewModel.popularPersons.collectAsState(), navController)
+                        "Trending people" -> PersonBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
+                        "Movies of the week" -> MovieBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
+                        "Trending movies" -> MovieBox(catagory, viewModel.trendingMovies.collectAsState(), viewModel, navController)
+                        else -> MovieBox(catagory, viewModel.noMovies.collectAsState(), viewModel, navController)
                     }
                 }
             }
@@ -391,7 +408,130 @@ fun GenerateLazyRows(viewModel: HomeScreenViewModel, navController: NavControlle
 }
 
 @Composable
-fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel: HomeScreenViewModel, navController: NavController) {
+fun BoxOfficeBox(
+    catagory: String,
+    boxOfficeNumbers:  List<Map<String, String>>,
+    navController: NavController
+) {
+    // date range
+    Row (
+        Modifier
+            .padding(start = 16.dp)
+            .fillMaxWidth(0.975f)
+    ) {
+        Box(
+            modifier = Modifier
+                .height(30.dp)
+                .fillMaxWidth()
+                .shadow(
+                    color = gray100,
+                    offsetX = 0.dp,
+                    offsetY = 0.dp,
+                    blurRadius = 0.dp,
+                    blurRadiusFilter = "SOLID"
+                ),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp),
+                text = "${ boxOfficeNumbers.first()["date range"] }"
+            )
+        }
+    }
+
+    Box (
+        Modifier
+            .padding(
+                start = 16.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            )
+            .fillMaxWidth(0.98f)) {
+        Box(
+            modifier = Modifier
+                .height(600.dp)
+                .fillMaxWidth(0.99f)
+                .shadow(
+                    color = gray500,
+                    offsetX = 0.dp,
+                    offsetY = 0.dp,
+                    blurRadius = 0.dp,
+                    blurRadiusFilter = "SOLID"
+                )
+        ) {
+            Column (
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                boxOfficeNumbers.forEachIndexed { i, movieMap ->
+                    Row (
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .width(72.dp)
+                                .padding(start = 8.dp, end = 8.dp),
+                            text = "${ i + 1 }",
+                            fontSize = MaterialTheme.typography.displaySmall.fontSize,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 16.dp)
+                                .size(36.dp)
+                                .background(gray200.copy(alpha = 0.6f))
+                                .drawBehind {
+                                    val path = Path().apply {
+                                        moveTo(75f, 126f)
+                                        lineTo(0f, 166f)
+                                        lineTo(0f, 126f)
+                                        moveTo(45f, 126f)
+                                        lineTo(125f, 126f)
+                                        lineTo(125f, 166f)
+                                        close()
+                                    }
+                                    drawPath(path, color = gray200.copy(alpha = 0.6f))
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Add,
+                                contentDescription = "add favorite"
+                            )
+                        }
+
+                        Column (
+                            modifier = Modifier
+                        ) {
+                            Text(text = "${ movieMap["Release"] }")
+                            Text(text = "${ movieMap["Gross"] }", textAlign = TextAlign.Center)
+                        }
+
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                            Icon(
+                                modifier = Modifier.padding(end = 16.dp),
+                                imageVector = Icons.Outlined.BookOnline,
+                                contentDescription = "book online"
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieBox(
+    catagory: String,
+    movies: State<MovieList?>,
+    viewModel: HomeScreenViewModel,
+    navController: NavController)
+{
     Box(modifier = Modifier.padding(start = 8.dp)) {
         LazyRow {
             movies.value?.results?.forEachIndexed { i, movie ->
@@ -423,7 +563,7 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
                                 },
                             contentAlignment = Alignment.TopStart
                         ) {
-                            GetImageAsync(
+                            ImageAsync(
                                 contentDescription = "${catagory} ${movie.title}",
                                 clip = false,
                                 backDropPath = if (movie.backdrop_path.isEmpty()) {
@@ -491,7 +631,7 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
                                         modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
                                         contentAlignment = Alignment.CenterStart
                                     ) {
-                                        Text(text = movie.title)
+                                        Text(text = movie.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     }
                                     Row (
                                         modifier = Modifier
@@ -537,7 +677,11 @@ fun CreateMovieDetailsBox(catagory: String, movies: State<MovieList?>, viewModel
 }
 
 @Composable
-fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navController: NavController) {
+fun PersonBox(
+    catagory: String,
+    persons: State<ActorList?>,
+    navController: NavController
+) {
     Box(modifier = Modifier.padding(start = 8.dp)) {
         LazyRow {
             persons.value?.results?.forEachIndexed { i, person ->
@@ -594,7 +738,7 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
                                 contentAlignment = Alignment.BottomStart
                             ) {
                                 // Image
-                                GetImageAsync(
+                                ImageAsync(
                                     contentDescription = "${ catagory } ${ person.name }",
                                     clip = true,
                                     aspectRatio = 5f / 8f,
@@ -669,7 +813,11 @@ fun CreatePersonDetailsBox(catagory: String, persons: State<ActorList?>, navCont
 }
 
 @Composable
-fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController: NavController) {
+fun TvBox(
+    catagory: String,
+    tvShows: State<TvList?>,
+    navController: NavController
+) {
     Box(modifier = Modifier.padding(start = 8.dp)) {
         LazyRow {
             tvShows.value?.results?.forEachIndexed { i, show ->
@@ -701,7 +849,7 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
                                 },
                             contentAlignment = Alignment.TopStart
                         ) {
-                            GetImageAsync(
+                            ImageAsync(
                                 contentDescription = "${ catagory } ${ show.name }",
                                 clip = false,
                                 backDropPath = if (show.backdrop_path.isEmpty()) {
@@ -793,7 +941,8 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
                                                 modifier = Modifier
                                                     .size(25.dp)
                                                     .clip(CircleShape)
-                                                    .background(color = gray600),
+                                                    .background(color = gray600)
+                                                    .clickable { },
                                                 contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
@@ -802,7 +951,8 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
                                                     fontWeight = FontWeight.Bold,
                                                     fontSize = MaterialTheme.typography.titleLarge.fontSize,
                                                     color = gray100,
-                                                    textAlign = TextAlign.Center
+                                                    textAlign = TextAlign.Center,
+
                                                 )
                                             }
                                         }
@@ -819,7 +969,12 @@ fun CreateTvDetailsBox(catagory: String, tvShows: State<TvList?>, navController:
 }
 
 @Composable
-fun CreateUpcommingDetailsBox(catagory: String, movies: State<MovieList?>, viewModel: HomeScreenViewModel, navController: NavController) {
+fun UpcommingBox(
+    catagory: String,
+    movies: State<MovieList?>,
+    viewModel: HomeScreenViewModel,
+    navController: NavController
+) {
     Box(modifier = Modifier.padding(start = 8.dp)) {
         LazyRow {
             movies.value?.results?.forEachIndexed { i, movie ->
@@ -877,7 +1032,7 @@ fun CreateUpcommingDetailsBox(catagory: String, movies: State<MovieList?>, viewM
                                     },
                                 contentAlignment = Alignment.TopStart
                             ) {
-                                GetImageAsync(
+                                ImageAsync(
                                     contentDescription = "${catagory} ${movie.title}",
                                     aspectRatio = 5f / 8f,
                                     backDropPath = if (movie.backdrop_path.isEmpty()) {
@@ -957,7 +1112,13 @@ fun CreateUpcommingDetailsBox(catagory: String, movies: State<MovieList?>, viewM
 }
 
 @Composable
-fun GetImageAsync(clip: Boolean = false, contentDescription: String, aspectRatio: Float = 2f / 3f, imgPath: String = Retrofit.IMAGE_PATH, backDropPath: String) {
+fun ImageAsync(
+    clip: Boolean = false,
+    contentDescription: String,
+    aspectRatio: Float = 2f / 3f,
+    imgPath: String = Retrofit.IMAGE_PATH,
+    backDropPath: String
+) {
     SubcomposeAsyncImage(
         model = "${ Retrofit.BASE_IMAGE_URL }${ imgPath }${ backDropPath }",
         modifier = Modifier
@@ -990,56 +1151,5 @@ fun isLoading() {
     )
 }
 
-//@Composable
-//@Preview(showBackground = true, showSystemUi = true)
-//fun ShadowBoxDrawPreview() {
-//    Box(
-//        modifier = Modifier
-//            .width(170.dp)
-//            .height(225.dp)
-//            .shadow(
-//                color = gray400,
-//                offsetX = 0.dp,
-//                offsetY = 0.dp,
-//                blurRadius = 4.dp
-//            )
-//    ) {
-//        Box (
-//            modifier = Modifier
-//                .width(160.dp)
-//                .height(206.dp)
-//                .shadow(
-//                    color = gray500,
-//                    offsetX = 8.dp,
-//                    offsetY = 2.dp,
-//                    blurRadius = 4.dp
-//                ),
-//            contentAlignment = Alignment.TopStart
-//        ) {
-//            Box(
-//                modifier = Modifier
-//                    .padding(top = 16.dp, start = 16.dp)
-//                    .size(36.dp)
-//                    .background(gray200)
-//                    .drawBehind {
-//                        val path = Path().apply {
-//                            moveTo(65f, 90f)
-//                            lineTo(0f, 125f)
-//                            lineTo(0f, 90f)
-//                            moveTo(35f, 90f)
-//                            lineTo(99f, 90f)
-//                            lineTo(99f, 125f)
-//                            close()
-//                        }
-//                        drawPath(path, color = gray200)
-//                    },
-//                contentAlignment = Alignment.Center
-//            ) {
-//                Icon(
-//                    imageVector = Icons.Outlined.Add,
-//                    contentDescription = "add favorite"
-//                )
-//            }
-//        }
-//    }
-//}
+// why the need to create a entirly new domain module?
+// why to make from api() -> implementation() to not expose that stuff to app
