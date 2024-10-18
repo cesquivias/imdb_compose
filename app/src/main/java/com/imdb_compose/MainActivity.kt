@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -90,6 +91,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -408,124 +410,6 @@ fun LazyRows(
 }
 
 @Composable
-fun BoxOfficeBox(
-    catagory: String,
-    boxOfficeNumbers:  List<Map<String, String>>,
-    navController: NavController
-) {
-    // date range
-    Row (
-        Modifier
-            .padding(start = 16.dp)
-            .fillMaxWidth(0.975f)
-    ) {
-        Box(
-            modifier = Modifier
-                .height(30.dp)
-                .fillMaxWidth()
-                .shadow(
-                    color = gray100,
-                    offsetX = 0.dp,
-                    offsetY = 0.dp,
-                    blurRadius = 0.dp,
-                    blurRadiusFilter = "SOLID"
-                ),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp),
-                text = "${ boxOfficeNumbers.first()["date range"] }"
-            )
-        }
-    }
-
-    Box (
-        Modifier
-            .padding(
-                start = 16.dp,
-                top = 8.dp,
-                bottom = 8.dp
-            )
-            .fillMaxWidth(0.98f)) {
-        Box(
-            modifier = Modifier
-                .height(600.dp)
-                .fillMaxWidth(0.99f)
-                .shadow(
-                    color = gray500,
-                    offsetX = 0.dp,
-                    offsetY = 0.dp,
-                    blurRadius = 0.dp,
-                    blurRadiusFilter = "SOLID"
-                )
-        ) {
-            Column (
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                boxOfficeNumbers.forEachIndexed { i, movieMap ->
-                    Row (
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            modifier = Modifier
-                                .width(72.dp)
-                                .padding(start = 8.dp, end = 8.dp),
-                            text = "${ i + 1 }",
-                            fontSize = MaterialTheme.typography.displaySmall.fontSize,
-                            textAlign = TextAlign.Center
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .padding(end = 16.dp)
-                                .size(36.dp)
-                                .background(gray200.copy(alpha = 0.6f))
-                                .drawBehind {
-                                    val path = Path().apply {
-                                        moveTo(75f, 126f)
-                                        lineTo(0f, 166f)
-                                        lineTo(0f, 126f)
-                                        moveTo(45f, 126f)
-                                        lineTo(125f, 126f)
-                                        lineTo(125f, 166f)
-                                        close()
-                                    }
-                                    drawPath(path, color = gray200.copy(alpha = 0.6f))
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Add,
-                                contentDescription = "add favorite"
-                            )
-                        }
-
-                        Column (
-                            modifier = Modifier
-                        ) {
-                            Text(text = "${ movieMap["Release"] }")
-                            Text(text = "${ movieMap["Gross"] }", textAlign = TextAlign.Center)
-                        }
-
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                            Icon(
-                                modifier = Modifier.padding(end = 16.dp),
-                                imageVector = Icons.Outlined.BookOnline,
-                                contentDescription = "book online"
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
 fun MovieBox(
     catagory: String,
     movies: State<MovieList?>,
@@ -534,7 +418,9 @@ fun MovieBox(
 {
     Box(modifier = Modifier.padding(start = 8.dp)) {
         LazyRow {
-            movies.value?.results?.forEachIndexed { i, movie ->
+            movies.value?.results?.filter {
+                it.poster_path != null
+            }?.forEachIndexed { i, movie ->
                 item {
                     Column(
                         modifier = Modifier
@@ -564,13 +450,9 @@ fun MovieBox(
                             contentAlignment = Alignment.TopStart
                         ) {
                             ImageAsync(
-                                contentDescription = "${catagory} ${movie.title}",
+                                contentDescription = "${ catagory } ${ movie.title }",
                                 clip = false,
-                                backDropPath = if (movie.backdrop_path.isEmpty()) {
-                                    movie.backdrop_path
-                                } else {
-                                    movie.poster_path
-                                }
+                                backDropPath = movie.poster_path
                             )
                             // ribbon
                             Box(
@@ -820,8 +702,14 @@ fun TvBox(
 ) {
     Box(modifier = Modifier.padding(start = 8.dp)) {
         LazyRow {
-            tvShows.value?.results?.forEachIndexed { i, show ->
+            tvShows.value?.results?.filter {
+                it.poster_path != null
+            }?.forEachIndexed { i, show ->
                 item {
+                    println(i)
+                    println(show.name)
+//                    println(show.backdrop_path)
+                    println(show.poster_path)
                     Column(
                         modifier = Modifier
                             .shadow(
@@ -849,40 +737,36 @@ fun TvBox(
                                 },
                             contentAlignment = Alignment.TopStart
                         ) {
-                            ImageAsync(
-                                contentDescription = "${ catagory } ${ show.name }",
-                                clip = false,
-                                backDropPath = if (show.backdrop_path.isEmpty()) {
-                                    show.backdrop_path
-                                } else {
-                                    show.poster_path
-                                }
-                            )
-                            // ribbon
-                            Box(
-                                modifier = Modifier
-                                    .padding(top = 1.dp, start = 1.dp)
-                                    .size(36.dp)
-                                    .background(gray200.copy(alpha = 0.6f))
-                                    .drawBehind {
-                                        val path = Path().apply {
-                                            moveTo(75f, 126f)
-                                            lineTo(0f, 166f)
-                                            lineTo(0f, 126f)
-                                            moveTo(45f, 126f)
-                                            lineTo(125f, 126f)
-                                            lineTo(125f, 166f)
-                                            close()
-                                        }
-                                        drawPath(path, color = gray200.copy(alpha = 0.6f))
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Add,
-                                    contentDescription = "add favorite"
-                                )
-                            }
+                                    ImageAsync(
+                                        contentDescription = "${ catagory } ${ show.name }",
+                                        clip = false,
+                                        backDropPath = show.poster_path
+                                    )
+                                    // ribbon
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(top = 1.dp, start = 1.dp)
+                                            .size(36.dp)
+                                            .background(gray200.copy(alpha = 0.6f))
+                                            .drawBehind {
+                                                val path = Path().apply {
+                                                    moveTo(75f, 126f)
+                                                    lineTo(0f, 166f)
+                                                    lineTo(0f, 126f)
+                                                    moveTo(45f, 126f)
+                                                    lineTo(125f, 126f)
+                                                    lineTo(125f, 166f)
+                                                    close()
+                                                }
+                                                drawPath(path, color = gray200.copy(alpha = 0.6f))
+                                            },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Add,
+                                            contentDescription = "add favorite"
+                                        )
+                                    }
                         }
                         // details box
                         Box (modifier = Modifier.width(155.dp)) {
@@ -1105,6 +989,124 @@ fun UpcommingBox(
                         }
                     }
                     Spacer(modifier = Modifier.width(16.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BoxOfficeBox(
+    catagory: String,
+    boxOfficeNumbers:  List<Map<String, String>>,
+    navController: NavController
+) {
+    // date range
+    Row (
+        Modifier
+            .padding(start = 16.dp)
+            .fillMaxWidth(0.975f)
+    ) {
+        Box(
+            modifier = Modifier
+                .height(30.dp)
+                .fillMaxWidth()
+                .shadow(
+                    color = gray100,
+                    offsetX = 0.dp,
+                    offsetY = 0.dp,
+                    blurRadius = 0.dp,
+                    blurRadiusFilter = "SOLID"
+                ),
+            contentAlignment = Alignment.CenterStart
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp),
+                text = "${ boxOfficeNumbers.first()["date range"] }"
+            )
+        }
+    }
+
+    Box (
+        Modifier
+            .padding(
+                start = 16.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            )
+            .fillMaxWidth(0.98f)) {
+        Box(
+            modifier = Modifier
+                .height(650.dp)
+                .fillMaxWidth(0.99f)
+                .shadow(
+                    color = gray500,
+                    offsetX = 0.dp,
+                    offsetY = 0.dp,
+                    blurRadius = 0.dp,
+                    blurRadiusFilter = "SOLID"
+                )
+        ) {
+            Column (
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                boxOfficeNumbers.forEachIndexed { i, movieMap ->
+                    Row (
+                        modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp, max = 80.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .width(72.dp)
+                                .padding(start = 8.dp, end = 8.dp),
+                            text = "${ i + 1 }",
+                            fontSize = MaterialTheme.typography.displaySmall.fontSize,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 16.dp)
+                                .size(36.dp)
+                                .background(gray200.copy(alpha = 0.6f))
+                                .drawBehind {
+                                    val path = Path().apply {
+                                        moveTo(75f, 126f)
+                                        lineTo(0f, 166f)
+                                        lineTo(0f, 126f)
+                                        moveTo(45f, 126f)
+                                        lineTo(125f, 126f)
+                                        lineTo(125f, 166f)
+                                        close()
+                                    }
+                                    drawPath(path, color = gray200.copy(alpha = 0.6f))
+                                },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Add,
+                                contentDescription = "add favorite"
+                            )
+                        }
+
+                        Column (
+                            modifier = Modifier
+                        ) {
+                            Text(text = "${ movieMap["Release"] }")
+                            Text(text = "${ movieMap["Gross"] }", textAlign = TextAlign.Center)
+                        }
+
+                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                            Icon(
+                                modifier = Modifier.padding(end = 16.dp),
+                                imageVector = Icons.Outlined.BookOnline,
+                                contentDescription = "book online"
+                            )
+                        }
+                    }
                 }
             }
         }
