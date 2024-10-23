@@ -224,14 +224,14 @@ fun TopBarWithBackBtn(
             Text(
                 text = title,
                 color = MaterialTheme.colorScheme.onSecondary,
-                fontSize = MaterialTheme.typography.headlineLarge.fontSize,
-                fontStyle = MaterialTheme.typography.headlineLarge.fontStyle,
-                fontWeight = MaterialTheme.typography.headlineLarge.fontWeight
+                fontSize = MaterialTheme.typography.titleLarge.fontSize,
+                fontStyle = MaterialTheme.typography.titleLarge.fontStyle,
+                fontWeight = MaterialTheme.typography.titleLarge.fontWeight
             )
         },
         navigationIcon = {
             IconButton(onClick = { backBtn() }) {
-                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back")
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "back", tint = Color.White)
             }
         },
         colors = TopAppBarColors(

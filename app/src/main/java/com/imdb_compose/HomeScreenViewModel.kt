@@ -329,15 +329,11 @@ class HomeScreenViewModel() : ViewModel() {
         viewModelScope.launch {
             val result = movieApi.getUpcomingMovies()
             _upcomingMovies.value = result
-            println("_upcomingMovies.value")
-            println(result)
         }
         // Television
         viewModelScope.launch {
             val result = tvApi.getTrendingTv()
             _trendingTv.value = result
-            println("_trendingTv.value")
-            println(result)
         }
         viewModelScope.launch {
             val result = tvApi.getAiringTodayTv()
@@ -417,5 +413,6 @@ data class ActorDetail(
     val deathDay: String,
     val place_of_birth: String,
     val profile_path: String,
-    val popularity: String
+    val popularity: String,
+    val known_for_department: String
 )
