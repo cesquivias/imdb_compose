@@ -62,6 +62,9 @@ interface MovieApi {
 
     @GET("${ UPCOMING_MOVIE_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getUpcomingMovies(): MovieList
+
+    @GET("3/movie/{id}?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    suspend fun getMovieDetails(@Path("id") id: Int): MovieDetail
 }
 
 interface TvApi {

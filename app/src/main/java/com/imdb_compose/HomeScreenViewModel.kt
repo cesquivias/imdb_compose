@@ -48,14 +48,16 @@ class HomeScreenViewModel() : ViewModel() {
     val peopleApi = Retrofit.getInstance().create(PeopleApi::class.java)
 
     val catagories: List<String> = listOf(
-        "Top box office",
+        "Upcoming movies",
         "Popular actors",
+        "Trending people",
         "Trending tv",
+        "Trending movies",
+        "Top box office",
         "Tv airing today",
         "Movies of the week",
-        "Trending movies",
-        "Upcoming movies",
-    ).shuffled()
+    )
+//    .shuffled()
 
     val noMovies: MutableStateFlow<MovieList?> = MutableStateFlow(null)
 
@@ -316,6 +318,102 @@ class HomeScreenViewModel() : ViewModel() {
      * }
      */
 
+    private val _movieDetails: MutableStateFlow<MovieDetail?> = MutableStateFlow(null)
+    val movieDetails: StateFlow<MovieDetail?> = _movieDetails.asStateFlow()
+
+    /**
+     * {
+     *   "adult": false,
+     *   "backdrop_path": "/3V4kLQg0kSqPLctI5ziYWabAZYF.jpg",
+     *   "belongs_to_collection": {
+     *     "id": 558216,
+     *     "name": "Venom Collection",
+     *     "poster_path": "/hoTLlTIohrzQ13HQVkZrDlvffuT.jpg",
+     *     "backdrop_path": "/vq340s8DxA5Q209FT8PHA6CXYOx.jpg"
+     *   },
+     *   "budget": 120000000,
+     *   "genres": [
+     *     {
+     *       "id": 878,
+     *       "name": "Science Fiction"
+     *     },
+     *     {
+     *       "id": 28,
+     *       "name": "Action"
+     *     },
+     *     {
+     *       "id": 12,
+     *       "name": "Adventure"
+     *     }
+     *   ],
+     *   "homepage": "https://venom.movie",
+     *   "id": 912649,
+     *   "imdb_id": "tt16366836",
+     *   "origin_country": [
+     *     "US"
+     *   ],
+     *   "original_language": "en",
+     *   "original_title": "Venom: The Last Dance",
+     *   "overview": "Eddie and Venom are on the run. Hunted by both of their worlds and with the net closing in, the duo are forced into a devastating decision that will bring the curtains down on Venom and Eddie's last dance.",
+     *   "popularity": 6130.313,
+     *   "poster_path": "/k42Owka8v91trK1qMYwCQCNwJKr.jpg",
+     *   "production_companies": [
+     *     {
+     *       "id": 5,
+     *       "logo_path": "/71BqEFAF4V3qjjMPCpLuyJFB9A.png",
+     *       "name": "Columbia Pictures",
+     *       "origin_country": "US"
+     *     },
+     *     {
+     *       "id": 84041,
+     *       "logo_path": "/nw4kyc29QRpNtFbdsBHkRSFavvt.png",
+     *       "name": "Pascal Pictures",
+     *       "origin_country": "US"
+     *     },
+     *     {
+     *       "id": 53462,
+     *       "logo_path": "/nx8B3Phlcse02w86RW4CJqzCnfL.png",
+     *       "name": "Matt Tolmach Productions",
+     *       "origin_country": "US"
+     *     },
+     *     {
+     *       "id": 91797,
+     *       "logo_path": null,
+     *       "name": "Hutch Parker Entertainment",
+     *       "origin_country": "US"
+     *     },
+     *     {
+     *       "id": 14439,
+     *       "logo_path": null,
+     *       "name": "Arad Productions",
+     *       "origin_country": "US"
+     *     }
+     *   ],
+     *   "production_countries": [
+     *     {
+     *       "iso_3166_1": "US",
+     *       "name": "United States of America"
+     *     }
+     *   ],
+     *   "release_date": "2024-10-22",
+     *   "revenue": 175000000,
+     *   "runtime": 109,
+     *   "spoken_languages": [
+     *     {
+     *       "english_name": "English",
+     *       "iso_639_1": "en",
+     *       "name": "English"
+     *     }
+     *   ],
+     *   "status": "Released",
+     *   "tagline": "'Til death do they part.",
+     *   "title": "Venom: The Last Dance",
+     *   "video": false,
+     *   "vote_average": 6.8,
+     *   "vote_count": 351
+     * }
+     */
+
     init {
         // Movies
         viewModelScope.launch {
@@ -354,6 +452,13 @@ class HomeScreenViewModel() : ViewModel() {
         viewModelScope.launch {
             val result = peopleApi.getPersonDetails(id)
             _personDetails.value = result
+        }
+    }
+
+    suspend fun getMovieDetails(id: Int) {
+        viewModelScope.launch {
+            val result = movieApi.getMovieDetails(id)
+            _movieDetails.value = result
         }
     }
 }
@@ -416,3 +521,33 @@ data class ActorDetail(
     val popularity: String,
     val known_for_department: String
 )
+
+data class MovieDetail(
+    val id: Int,
+    val imdb_id: String,
+    val title: String,
+    val original_title: String,
+    val adult: Boolean,
+    val backdrop_path: String,
+    val genres: List<Any>,
+    val belongs_to_collection: MovieCollection,
+    val budget: Int,
+    val overview: String,
+    val popularity: String,
+    val poster_path: String,
+    val release_date: String,
+    val revenue: Int,
+    val runtime: Int,
+    val status: String,
+    val tagline: String,
+    val vote_average: String,
+    val vote_count: Int
+)
+
+data class MovieCollection(
+    val id: Int,
+    val name: String,
+    val poster_path: String,
+    val backdrop_path: String
+)
+
