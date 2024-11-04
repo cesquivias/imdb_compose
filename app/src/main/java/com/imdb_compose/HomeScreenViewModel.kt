@@ -57,7 +57,7 @@ class HomeScreenViewModel() : ViewModel() {
         "Tv airing today",
         "Movies of the week",
     )
-//    .shuffled()
+    .shuffled()
 
     val noMovies: MutableStateFlow<MovieList?> = MutableStateFlow(null)
 
@@ -320,7 +320,6 @@ class HomeScreenViewModel() : ViewModel() {
 
     private val _movieDetails: MutableStateFlow<MovieDetail?> = MutableStateFlow(null)
     val movieDetails: StateFlow<MovieDetail?> = _movieDetails.asStateFlow()
-
     /**
      * {
      *   "adult": false,
@@ -414,6 +413,50 @@ class HomeScreenViewModel() : ViewModel() {
      * }
      */
 
+    private val _movieImages: MutableStateFlow<MovieImages?> = MutableStateFlow(null)
+    val movieImages: StateFlow<MovieImages?> = _movieImages.asStateFlow()
+    /**
+     * {
+     *     "id": 933260,
+     *     "backdrops": [
+     *         {
+     *             "aspect_ratio": 1.778,
+     *             "height": 2160,
+     *             "iso_639_1": null,
+     *             "file_path": "/7h6TqPB3ESmjuVbxCxAeB1c9OB1.jpg",
+     *             "vote_average": 5.458,
+     *             "vote_count": 15,
+     *             "width": 3840
+     *         },
+     *         ...
+     *     ],
+     *     "logos": [
+     *         {
+     *             "aspect_ratio": 4.907,
+     *             "height": 482,
+     *             "iso_639_1": "en",
+     *             "file_path": "/yXMt7AkV2W5sZsq8DtFZaBUupZS.png",
+     *             "vote_average": 5.522,
+     *             "vote_count": 4,
+     *             "width": 2365
+     *         },
+     *         ...
+     *     ],
+     *     "posters": [
+     *         {
+     *             "aspect_ratio": 0.667,
+     *             "height": 3000,
+     *             "iso_639_1": "tr",
+     *             "file_path": "/rNrBHeqnDA8aHIz9eYkBskcKhq7.jpg",
+     *             "vote_average": 5.522,
+     *             "vote_count": 4,
+     *             "width": 2000
+     *         },
+     *         ...
+     *     ]
+     * }
+     */
+
     init {
         // Movies
         viewModelScope.launch {
@@ -459,6 +502,13 @@ class HomeScreenViewModel() : ViewModel() {
         viewModelScope.launch {
             val result = movieApi.getMovieDetails(id)
             _movieDetails.value = result
+        }
+    }
+
+    suspend fun getMovieImages(id: Int) {
+        viewModelScope.launch {
+            val result = movieApi.getMovieImages(id)
+            _movieImages.value = result
         }
     }
 }
@@ -529,7 +579,7 @@ data class MovieDetail(
     val original_title: String,
     val adult: Boolean,
     val backdrop_path: String,
-    val genres: List<Any>,
+    val genres: List<Genre>,
     val belongs_to_collection: MovieCollection,
     val budget: Int,
     val overview: String,
@@ -544,6 +594,11 @@ data class MovieDetail(
     val vote_count: Int
 )
 
+data class Genre(
+    val id: Int,
+    val name: String
+)
+
 data class MovieCollection(
     val id: Int,
     val name: String,
@@ -551,3 +606,18 @@ data class MovieCollection(
     val backdrop_path: String
 )
 
+data class MovieImages(
+    val id: Int,
+    val backdrops: List<MovieImageResult>,
+    val posters: List<MovieImageResult>,
+    val logos: List<MovieImageResult>
+)
+
+data class MovieImageResult(
+    val aspect_ratio: Float,
+    val height: Int,
+    val file_path: String,
+    val vote_average: Float,
+    val vote_count: Int,
+    val width: Int
+)

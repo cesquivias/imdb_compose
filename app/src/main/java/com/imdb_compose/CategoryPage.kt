@@ -84,7 +84,8 @@ fun CategoryPage(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TvCarousel(category, viewModel, catagoryPageViewModel)
+//                TvCarousel(category, viewModel, catagoryPageViewModel)
+                Text("TODO")
             }
             Spacer(modifier = Modifier.height(8.dp))
 //            Column (
@@ -130,39 +131,26 @@ fun CategoryPage(
     }
 }
 
-@SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TvCarousel(category: String, viewModel: HomeScreenViewModel, catagoryPageViewModel: CatagoryPageViewModel) {
-    val tvShows = viewModel.trendingTv.collectAsState().value?.results?.toList()!!
-
-
-
-    val carouselState = rememberCarouselState { 3 }
-    Box(modifier = Modifier.fillMaxSize()) {
-        HorizontalUncontainedCarousel(
-            state = carouselState,
-            itemWidth = 400.dp,
-            itemSpacing = 8.dp
-        ) {page ->
-            Box(
-                modifier = Modifier
-                    .size(250.dp)
-                    .border(width = 2.dp, color = MaterialTheme.colorScheme.outline)
-            ) {
-                Image(
-                    painter =  when (page) {
-                        0 -> painterResource(R.drawable.geodude_74)
-                        1 -> painterResource(R.drawable.graveler_75)
-                        else -> painterResource(R.drawable.golem_76)
-                    },
-                    contentDescription = "",
-                    modifier = Modifier
-                        .padding(all = 16.dp)
-                        .size(200.dp)
-                )
-            }
-        }
-    }
-}
+//@SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun TvCarousel(category: String, viewModel: HomeScreenViewModel, catagoryPageViewModel: CatagoryPageViewModel) {
+//    val tvShows = viewModel.trendingTv.collectAsState().value?.results?.toList()!!
+//    val carouselState = rememberCarouselState { 3 }
+//    Box(modifier = Modifier.fillMaxSize()) {
+//        HorizontalUncontainedCarousel(
+//            state = carouselState,
+//            itemWidth = 400.dp,
+//            itemSpacing = 8.dp
+//        ) {page ->
+//            Box(
+//                modifier = Modifier
+//                    .size(250.dp)
+//                    .border(width = 2.dp, color = MaterialTheme.colorScheme.outline)
+//            ) {
+//
+//            }
+//        }
+//    }
+//}
 

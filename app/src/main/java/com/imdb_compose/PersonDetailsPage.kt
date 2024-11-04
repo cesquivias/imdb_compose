@@ -142,7 +142,7 @@ fun PersonDetailsPage(
                                         shape = RoundedCornerShape(4.dp),
                                         onClick = { /*TODO*/ },
                                         colors = ButtonColors(
-                                            containerColor = Color.Yellow,
+                                            containerColor = ripeMango,
                                             contentColor = Color.White,
                                             disabledContainerColor = Color.Red,
                                             disabledContentColor = Color.White,

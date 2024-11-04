@@ -37,10 +37,6 @@ object Retrofit {
     const val IMAGE_PATH =  "t/p/original/"
     const val IMAGE_PATH_w500 = "t/p/w500/"
 
-    fun getMovieImgUrl(id: Int): String {
-        return "3/movie/${id}/images"
-    }
-
     fun getInstance(): Retrofit {
         val client = OkHttpClient()
         val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
@@ -65,6 +61,9 @@ interface MovieApi {
 
     @GET("3/movie/{id}?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getMovieDetails(@Path("id") id: Int): MovieDetail
+
+    @GET("3/movie/{id}/images?api_key=${ BuildConfig.API_KEY }")
+    suspend fun getMovieImages(@Path("id") id: Int): MovieImages
 }
 
 interface TvApi {

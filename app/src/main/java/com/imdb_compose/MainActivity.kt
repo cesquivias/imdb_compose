@@ -318,6 +318,12 @@ val blue100 = Color(0xff1eeeff)
 val blue200 = Color(0xff3D76E0)
 val blue300 = Color(0xff1e90ff)
 val blue400 = Color(0xff1e32ff)
+val bananaYellow = Color(0xffffe134)
+val ripeMango = Color(0xffffbf2e)
+val constuctionOrange = Color(0xffffc300)
+val deepSaffron= Color(0xffff9e28)
+val princetonOrange = Color(0xfffe7c22)
+val giantsOrange = Color(0xfffe5a1c)
 
 @Composable
 fun LazyRows(
@@ -353,7 +359,7 @@ fun LazyRows(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Yellow Accent <Catagory>
+                        // Orange Accent <Catagory>
                         Row (verticalAlignment = Alignment.CenterVertically) {
                             Box(
                                 modifier = Modifier
@@ -361,7 +367,7 @@ fun LazyRows(
                                     .clip(RoundedCornerShape(24.dp))
                                     .height(36.dp)
                                     .width(6.dp)
-                                    .background(Color.Yellow)
+                                    .background(ripeMango)
                             )
                             Text(
                                 text = catagory,
@@ -817,7 +823,7 @@ fun PosterBoxB(
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     fontStyle = MaterialTheme.typography.labelLarge.fontStyle,
                     fontWeight = MaterialTheme.typography.labelLarge.fontWeight,
-                    color = Color.Yellow,
+                    color = ripeMango,
                     textAlign = TextAlign.Center
                 )
             }
@@ -922,7 +928,7 @@ fun Details(
                     modifier = Modifier.padding(start = 8.dp),
                     imageVector = Icons.Filled.Star,
                     contentDescription = "rating",
-                    tint = Color.Yellow
+                    tint = ripeMango
                 )
                 if (movie != null) {
                     Text(modifier = Modifier.padding(start = 8.dp), text = movie.vote_average)
