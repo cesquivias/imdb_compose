@@ -1,12 +1,10 @@
-package com.imdb_compose
+package com.imdb_compose.ui
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.shapes.RoundRectShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,16 +23,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.imdb_compose.BottomBar
+import com.imdb_compose.domain.Retrofit
+import com.imdb_compose.TopBarWithBackBtn
+import com.imdb_compose.gray500
+import com.imdb_compose.isLoading
+import com.imdb_compose.ripeMango
+import com.imdb_compose.shadow
 import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")

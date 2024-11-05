@@ -1,12 +1,13 @@
-package com.imdb_compose
+package com.imdb_compose.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.ImageLoader
+import com.imdb_compose.domain.MovieApi
+import com.imdb_compose.domain.Retrofit
+import com.imdb_compose.domain.TvApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 
 class CatagoryPageViewModel(category: String) : ViewModel() {

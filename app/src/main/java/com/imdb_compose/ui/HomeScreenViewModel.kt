@@ -1,17 +1,15 @@
-package com.imdb_compose
+package com.imdb_compose.ui
 
-import android.util.Log
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.imdb_compose.domain.MovieApi
+import com.imdb_compose.domain.PeopleApi
+import com.imdb_compose.domain.Retrofit
+import com.imdb_compose.domain.TvApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Response
 
 /**
  * people

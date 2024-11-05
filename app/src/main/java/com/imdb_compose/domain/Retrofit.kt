@@ -1,12 +1,21 @@
-package com.imdb_compose
+package com.imdb_compose.domain
 
-import com.imdb_compose.Retrofit.AIRING_TODAY_TV_PATH
-import com.imdb_compose.Retrofit.MOVIES_OF_WEEK_PATH
-import com.imdb_compose.Retrofit.POPULAR_PERSONS_PATH
-import com.imdb_compose.Retrofit.TRENDING_MOVIES_DAY_PATH
-import com.imdb_compose.Retrofit.TRENDING_PERSONS_DAY_PATH
-import com.imdb_compose.Retrofit.TRENDING_TV_DAY_PATH
-import com.imdb_compose.Retrofit.UPCOMING_MOVIE_PATH
+import com.imdb_compose.BuildConfig
+import com.imdb_compose.domain.Retrofit.AIRING_TODAY_TV_PATH
+import com.imdb_compose.domain.Retrofit.MOVIES_OF_WEEK_PATH
+import com.imdb_compose.domain.Retrofit.POPULAR_PERSONS_PATH
+import com.imdb_compose.domain.Retrofit.TRENDING_MOVIES_DAY_PATH
+import com.imdb_compose.domain.Retrofit.TRENDING_PERSONS_DAY_PATH
+import com.imdb_compose.domain.Retrofit.TRENDING_TV_DAY_PATH
+import com.imdb_compose.domain.Retrofit.UPCOMING_MOVIE_PATH
+import com.imdb_compose.ui.ActorDetail
+import com.imdb_compose.ui.ActorList
+import com.imdb_compose.ui.ImageResults
+import com.imdb_compose.ui.Images
+import com.imdb_compose.ui.MovieDetail
+import com.imdb_compose.ui.MovieList
+import com.imdb_compose.ui.TvDetails
+import com.imdb_compose.ui.TvList
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -50,46 +59,46 @@ object Retrofit {
 }
 
 interface MovieApi {
-    @GET("${ MOVIES_OF_WEEK_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ MOVIES_OF_WEEK_PATH }?language=en-US&api_key=${BuildConfig.API_KEY}")
     suspend fun getMoviesOfWeekList(): MovieList
 
-    @GET("${ TRENDING_MOVIES_DAY_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ TRENDING_MOVIES_DAY_PATH }?language=en-US&api_key=${BuildConfig.API_KEY}")
     suspend fun getTrendingMovies(): MovieList
 
-    @GET("${ UPCOMING_MOVIE_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ UPCOMING_MOVIE_PATH }?language=en-US&api_key=${BuildConfig.API_KEY}")
     suspend fun getUpcomingMovies(): MovieList
 
-    @GET("3/movie/{id}?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("3/movie/{id}?language=en-US&api_key=${BuildConfig.API_KEY}")
     suspend fun getMovieDetails(@Path("id") id: Int): MovieDetail
 
-    @GET("3/movie/{id}/images?api_key=${ BuildConfig.API_KEY }")
+    @GET("3/movie/{id}/images?api_key=${BuildConfig.API_KEY}")
     suspend fun getMovieImages(@Path("id") id: Int): Images
 }
 
 interface TvApi {
-    @GET("${ TRENDING_TV_DAY_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ TRENDING_TV_DAY_PATH }?language=en-US&api_key=${BuildConfig.API_KEY}")
     suspend fun getTrendingTv(): TvList
 
-    @GET("${ AIRING_TODAY_TV_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ AIRING_TODAY_TV_PATH }?language=en-US&api_key=${BuildConfig.API_KEY}")
     suspend fun getAiringTodayTv(): TvList
 
-    @GET("3/tv/{id}/images/{img_path}?api_key=${ BuildConfig.API_KEY }")
+    @GET("3/tv/{id}/images/{img_path}?api_key=${BuildConfig.API_KEY}")
     suspend fun getTvImg(@Path("id") id: Int, @Path("img_path") imgPath: String): ImageResults
 
-    @GET("/3/tv/{id}?api_key=${ BuildConfig.API_KEY }")
+    @GET("/3/tv/{id}?api_key=${BuildConfig.API_KEY}")
     suspend fun getTvSeriesDetails(@Path("id") id: Int): TvDetails
 
-    @GET("/3/tv/{id}/images?api_key=${ BuildConfig.API_KEY }")
+    @GET("/3/tv/{id}/images?api_key=${BuildConfig.API_KEY}")
     suspend fun getTvSeriesImages(@Path("id") id: Int): Images
 }
 
 interface PeopleApi {
-    @GET("${ POPULAR_PERSONS_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ POPULAR_PERSONS_PATH }?language=en-US&api_key=${BuildConfig.API_KEY}")
     suspend fun getPopularPersons(): ActorList
 
-    @GET("${ TRENDING_PERSONS_DAY_PATH }?language=en-US&append_to_response=details&api_key=${ BuildConfig.API_KEY }")
+    @GET("${ TRENDING_PERSONS_DAY_PATH }?language=en-US&append_to_response=details&api_key=${BuildConfig.API_KEY}")
     suspend fun getTrendingPersons(): ActorList
 
-    @GET("3/person/{id}?language=en-US&api_key=${ BuildConfig.API_KEY }")
+    @GET("3/person/{id}?language=en-US&api_key=${BuildConfig.API_KEY}")
     suspend fun getPersonDetails(@Path("id") id: Int): ActorDetail
 }

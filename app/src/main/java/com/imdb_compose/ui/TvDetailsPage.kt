@@ -1,9 +1,8 @@
-package com.imdb_compose
+package com.imdb_compose.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +32,13 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.imdb_compose.BottomBar
+import com.imdb_compose.Pager
+import com.imdb_compose.Tags
+import com.imdb_compose.TopBarWithBackBtn
+import com.imdb_compose.domain.Retrofit
+import com.imdb_compose.isLoading
+import com.imdb_compose.ripeMango
 import kotlinx.coroutines.launch
 
 @SuppressLint("CoroutineCreationDuringComposition", "StateFlowValueCalledInComposition")
