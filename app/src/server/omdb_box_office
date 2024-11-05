@@ -1,0 +1,264 @@
+#! /usr/bin/env Python3
+
+import asyncio
+import datetime
+
+from pprint import pprint
+from jproperties import Properties
+from boxoffice_api import BoxOffice
+
+config = Properties()
+
+with open('../../../auth.properties', 'rb') as config_file:
+    config.load(config_file)
+
+OMDB_API_KEY = config.get('OMDB_API_KEY').data
+box_office = BoxOffice(api_key=OMDB_API_KEY)
+
+
+# OMDb API: http://www.omdbapi.com/?i=tt3896198&apikey=
+
+# Get weekend box office information for a specific year and week 
+async def get_daily_data(day):
+    try:
+        daily_data = box_office.get_daily(day)
+        return daily_data
+    except Exception as err:
+        print('day_format: String = "YYYY-MM-DD"')
+        print(err)
+        
+
+# Get weekly box office information for a specific year and week 
+async def get_weekend_data(year, week):
+    try:
+        weekend_data = box_office.get_weekend(year=year, week=week)
+        return weekend_data
+    except Exception as err:
+        print("year format: Int = YYYY")
+        print("week format: Int = (1..52)")
+        print(err)
+
+# Get monthly box office information for a specific year and month 
+async def get_weekly_data(year, week_number):
+    try:
+        weekly_data = box_office.get_weekly(year=year, week=week_number)
+        for movie in weekly_data:
+            movie["date range"] = week_to_date_range(year, week_number)
+            movie.pop("Error", None)
+        return weekly_data
+    except Exception as err:
+        print("year format: Int = YYYY")
+        print("week format: Int = (1..52)")
+        print(err)
+
+# Get seasonal box office information for a specific year and season 
+async def get_monthly_data(year, month):
+    try:
+        monthly_data = box_office.get_monthly(year=year, month=month)
+        return monthly_data
+    except Exception as err:
+        print("year format: Int = YYYY")
+        print("month format: Int = (1..12)")
+        print(err)
+
+# Get quarterly box office information for a specific quarter and year 
+async def get_seasonal_data(year, season):
+    try:
+        seasonal_data = box_office.get_season(year=year, season=season.lower())
+        return seasonal_data
+    except Exception as err:
+        print("year format: Int = YYYY")
+        print('season format: Enum<String> = ("winter", "fall", "summer", "spring")')
+        print(err)
+
+# Get yearly box office information for a specific year 
+async def get_quarterly_data(quarter, year):
+    try:
+        quarterly_data = box_office.get_quarterly(quarterly=quarter, year=year)
+        return quarterly_data
+    except Exception as err:
+        print("quarter format: Int = (1..4)")
+        print("year format: Int = YYYY")
+        print(err)
+
+# Access the data as a list of dictionaries for movie in daily_data: print(movie)
+async def get_yearly_data(year):
+    try:
+        yearly_data = box_office.get_yearly(year=year)
+        return yearly_data
+    except Exception as err:
+        print("year format: Int = YYYY")
+        print(err)
+
+def week_to_date_range(year, week_number):
+    try:
+        first_day_of_year = datetime.date(year, 1, 1)
+        first_week_day = first_day_of_year.isocalendar().weekday
+
+        # adjust for the first week
+        if first_week_day != 1:
+            delta = 7 - first_week_day + 1
+            first_day_of_year += datetime.timedelta(days=delta)
+
+        start_date = first_day_of_year + datetime.timedelta(weeks=week_number - 1)
+        end_date = start_date + datetime.timedelta(days=6)
+
+        start_month = start_date.strftime("%B")
+        end_month = end_date.strftime("%B")
+
+        return f"{ start_month } { start_date.day } - { end_month } { end_date.day }"
+
+    except Exception as err:
+        print(err)
+
+# year = 2024
+# week_number = 52
+
+# date_range = week_to_date_range(year, week_number)
+# print(date_range)
+
+async def main():
+    # data = await get_daily_data("2024-08-29")
+    # pprint(data)
+    # data = await get_weekend_data()
+    # pprint(data)
+    data = await get_weekly_data(2024, 38)
+    pprint(data)
+    # data = await get_monthly_data(2024, 8)
+    # pprint(data)
+    # data = await get_seasonal_data(2023, "fall")
+    # pprint(data)
+    # data = await get_quarterly_data()
+    # pprint(data)
+    # data = await get_yearly_data()
+    # pprint(data)
+    # pprint("TODO :: exec functionality")
+    
+
+foo = [{'Distributor': 'Walt Disney Studios Motion Pictures','Error': 'Invalid API key!','Gross': '$313,373,536','Rank': '1','Release': 'Deadpool & Wolverine','Release Date': 'Jul 26','Response': 'False','Theaters': '4,330','Total Gross': '$631,387,367'},
+{'Distributor': 'Sony Pictures Releasing','Error': 'Invalid API key!','Gross': '$131,027,790','Rank': '2','Release': 'It Ends with Us','Release Date': 'Aug 9','Response': 'False','Theaters': '3,839','Total Gross': '$147,900,817'},
+{'Distributor': 'Universal Pictures','Error': 'Invalid API key!','Gross': '$86,617,535','Rank': '3','Release': 'Twisters','Release Date': 'Jul 19','Response': 'False','Theaters': '4,170','Total Gross': '$267,572,020'},
+{'Distributor': 'Walt Disney Studios Motion Pictures','Error': 'Invalid API key!','Gross': '$85,174,064','Rank': '4','Release': 'Alien: Romulus','Release Date': 'Aug 16','Response': 'False','Theaters': '3,915','Total Gross': '$104,674,370'},
+{'Distributor': 'Universal Pictures','Error': 'Invalid API key!','Gross': '$52,237,305','Rank': '5','Release': 'Despicable Me 4','Release Date': 'Jul 3','Response': 'False','Theaters': '4,449','Total Gross': '$360,798,415'},
+{'Distributor': 'Warner Bros.','Error': 'Invalid API key!','Gross': '$39,628,556','Rank': '6','Release': 'Trap','Release Date': 'Aug 2','Response': 'False','Theaters': '3,181','Total Gross': '$42,759,835'},
+{'Distributor': 'Walt Disney Studios Motion Pictures','Error': 'Invalid API key!','Gross': '$30,112,703','Rank': '7','Release': 'Inside Out 2','Release Date': 'Jun 14','Response': 'False','Theaters': '4,440','Total Gross': '$652,953,570'},
+{'Distributor': 'Fathom Events','Error': 'Invalid API key!','Gross': '$28,160,405','Rank': '8','Release': 'Coraline15th Anniversary','Release Date': 'Aug 15','Response': 'False','Theaters': '1,564','Total Gross': '$33,626,425'},
+{'Distributor': 'Columbia Pictures','Error': 'Invalid API key!','Gross': '$17,200,352','Rank': '9','Release': 'Harold and the Purple Crayon','Release Date': 'Aug 2','Response': 'False','Theaters': '3,325','Total Gross': '$17,635,576'},
+{'Distributor': 'Lionsgate Films','Error': 'Invalid API key!','Gross': '$15,423,604','Rank': '10','Release': 'Borderlands','Release Date': 'Aug 9','Response': 'False','Theaters': '3,125','Total Gross': '$15,482,668'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$13,703,880','Rank': '11','Release': 'Blink Twice','Release Date': 'Aug 23','Response': 'False','Theaters': '3,067','Total Gross': '$23,040,893'},
+{'Distributor': 'Affirm Films','Error': 'Invalid API key!','Gross': '$12,499,226','Rank': '12','Release': 'The Forge','Release Date': 'Aug 23','Response': 'False','Theaters': '1,921','Total Gross': '$27,592,649'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$11,869,951','Rank': '13','Release': 'Longlegs','Release Date': 'Jul 12','Response': 'False','Theaters': '2,850','Total Gross': '$74,045,655'},
+{'Distributor': 'Lionsgate Films','Error': 'Invalid API key!','Gross': '$7,504,838','Rank': '14','Release': 'The Crow','Release Date': 'Aug 23','Response': 'False','Theaters': '2,752','Total Gross': '$9,275,659'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$6,173,031','Rank': '15','Release': 'Cuckoo','Release Date': 'Aug 9','Response': 'False','Theaters': '1,503','Total Gross': '$6,217,733'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$5,100,680','Rank': '16','Release': 'Reagan','Release Date': 'Aug 30','Response': 'False','Theaters': '2,770','Total Gross': '$27,738,526'},
+{'Distributor': 'Focus Features','Error': 'Invalid API key!','Gross': '$3,813,438','Rank': '17','Release': 'Dìdi','Release Date': 'Jul 26','Response': 'False','Theaters': '435','Total Gross': '$4,839,360'},
+{'Distributor': 'Paramount Pictures','Error': 'Invalid API key!','Gross': '$3,258,713','Rank': '18','Release': 'A Quiet Place: Day One','Release Date': 'Jun 28','Response': 'False','Theaters': '3,708','Total Gross': '$138,930,553'},
+{'Distributor': 'Sony Pictures Releasing','Error': 'Invalid API key!','Gross': '$2,535,011','Rank': '19','Release': 'Afraid','Release Date': 'Aug 30','Response': 'False','Theaters': '3,003','Total Gross': '$6,726,179'},
+{'Distributor': 'Roadside Attractions','Error': 'Invalid API key!','Gross': '$2,386,185','Rank': '20','Release': 'My Penguin Friend','Release Date': 'Aug 16','Response': 'False','Theaters': '1,083','Total Gross': '$2,746,906'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$2,189,486','Rank': '21','Release': 'Strange Darling','Release Date': 'Aug 23','Response': 'False','Theaters': '1,135','Total Gross': '$3,081,296'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$2,184,000','Rank': '22','Release': 'Stree 2','Release Date': 'Aug 16','Response': 'False','Theaters': '666','Total Gross': '$2,570,000'},
+{'Distributor': 'Atlas Distribution Company','Error': 'Invalid API key!','Gross': '$1,757,110','Rank': '23','Release': 'The Firing Squad','Release Date': 'Aug 2','Response': 'False','Theaters': '810','Total Gross': '$1,757,110'},
+{'Distributor': 'A24','Error': 'Invalid API key!','Gross': '$1,527,262','Rank': '24','Release': 'Sing Sing','Release Date': 'Jul 12','Response': 'False','Theaters': '191','Total Gross': '$2,655,616'},
+{'Distributor': 'Sony Pictures Releasing','Error': 'Invalid API key!','Gross': '$1,354,624','Rank': '25','Release': 'Bad Boys: Ride or Die','Release Date': 'Jun 7','Response': 'False','Theaters': '3,885','Total Gross': '$193,573,217'},
+{'Distributor': 'Fathom Events','Error': 'Invalid API key!','Gross': '$1,264,254','Rank': '26','Release': 'Sight & Sound Presents: Daniel LIVE','Release Date': 'Aug 30','Response': 'False','Theaters': '851','Total Gross': '$2,629,933'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$1,228,038','Rank': '27','Release': 'Between the Temples','Release Date': 'Aug 23','Response': 'False','Theaters': '576','Total Gross': '$2,054,707'},
+{'Distributor': 'Bleecker Street Media','Error': 'Invalid API key!','Gross': '$1,097,041','Rank': '28','Release': 'The Fabulous Four','Release Date': 'Jul 26','Response': 'False','Theaters': '1,045','Total Gross': '$2,854,291'},
+{'Distributor': 'Roadside Attractions','Error': 'Invalid API key!','Gross': '$1,055,375','Rank': '29','Release': 'City of Dreams','Release Date': 'Aug 30','Response': 'False','Theaters': '774','Total Gross': '$1,713,366'},
+{'Distributor': 'Sony Pictures Releasing','Error': 'Invalid API key!','Gross': '$1,052,005','Rank': '30','Release': 'Kneecap','Release Date': 'Aug 2','Response': 'False','Theaters': '703','Total Gross': '$1,142,231'},
+{'Distributor': 'Lionsgate Films','Error': 'Invalid API key!','Gross': '$942,446','Rank': '31','Release': '1992','Release Date': 'Aug 30','Response': 'False','Theaters': '875','Total Gross': '$2,906,073'},
+{'Distributor': 'Columbia Pictures','Error': 'Invalid API key!','Gross': '$941,138','Rank': '32','Release': 'Fly Me to the Moon','Release Date': 'Jul 12','Response': 'False','Theaters': '3,356','Total Gross': '$20,532,222'},
+{'Distributor': 'Fathom Events','Error': 'Invalid API key!','Gross': '$800,000','Rank': '33','Release': 'PonyoStudio Ghibli Fest 2024','Release Date': 'Aug 3','Response': 'False','Theaters': '-','Total Gross': '$800,000'},
+{'Distributor': 'Oscilloscope','Error': 'Invalid API key!','Gross': '$637,264','Rank': '34','Release': 'CatVideoFest 2024','Release Date': 'Aug 2','Response': 'False','Theaters': '106','Total Gross': '$756,435'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$609,329','Rank': '35','Release': "Ryan's World the Movie: Titan Universe Adventure",'Release Date': 'Aug 16','Response': 'False','Theaters': '1,285','Total Gross': '$613,001'},
+{'Distributor': 'Vertical Entertainment','Error': 'Invalid API key!','Gross': '$474,845','Rank': '36','Release': 'Widow Clicquot','Release Date': 'Jul 19','Response': 'False','Theaters': '102','Total Gross': '$1,023,984'},
+{'Distributor': 'Focus Features','Error': 'Invalid API key!','Gross': '$453,830','Rank': '37','Release': 'Shaun of the Dead2024 Re-release','Release Date': 'Aug 30','Response': 'False','Theaters': '256','Total Gross': '$789,695'},
+{'Distributor': 'IFC Films','Error': 'Invalid API key!','Gross': '$452,869','Rank': '38','Release': 'Skincare','Release Date': 'Aug 16','Response': 'False','Theaters': '760','Total Gross': '$456,590'},
+{'Distributor': 'Republic Pictures (I)','Error': 'Invalid API key!','Gross': '$383,520','Rank': '39','Release': 'Rob Peace','Release Date': 'Aug 16','Response': 'False','Theaters': '526','Total Gross': '$383,520'},
+{'Distributor': 'Bleecker Street Media','Error': 'Invalid API key!','Gross': '$375,690','Rank': '40','Release': 'Slingshot','Release Date': 'Aug 30','Response': 'False','Theaters': '845','Total Gross': '$735,738'},
+{'Distributor': 'Magnolia Pictures','Error': 'Invalid API key!','Gross': '$334,212','Rank': '41','Release': 'Thelma','Release Date': 'Jun 21','Response': 'False','Theaters': '1,290','Total Gross': '$8,988,249'},
+{'Distributor': 'Well Go USA Entertainment','Error': 'Invalid API key!','Gross': '$326,581','Rank': '42','Release': 'Twilight of the Warriors: Walled In','Release Date': 'Aug 9','Response': 'False','Theaters': '139','Total Gross': '$336,023'},
+{'Distributor': 'Well Go USA Entertainment','Error': 'Invalid API key!','Gross': '$310,572','Rank': '43','Release': 'You Gotta Believe','Release Date': 'Aug 30','Response': 'False','Theaters': '730','Total Gross': '$1,382,147'},
+{'Distributor': 'A24','Error': 'Invalid API key!','Gross': '$284,781','Rank': '44','Release': 'MaXXXine','Release Date': 'Jul 5','Response': 'False','Theaters': '2,450','Total Gross': '$15,097,632'},
+{'Distributor': 'Metrograph Pictures','Error': 'Invalid API key!','Gross': '$214,904','Rank': '45','Release': 'Good One','Release Date': 'Aug 9','Response': 'False','Theaters': '93','Total Gross': '$314,132'},
+{'Distributor': '20th Century Studios','Error': 'Invalid API key!','Gross': '$192,939','Rank': '46','Release': 'Kingdom of the Planet of the Apes','Release Date': 'May 10','Response': 'False','Theaters': '4,075','Total Gross': '$171,130,165'},
+{'Distributor': 'Greenwich Entertainment','Error': 'Invalid API key!','Gross': '$159,860','Rank': '47','Release': 'Coup!','Release Date': 'Aug 2','Response': 'False','Theaters': '258','Total Gross': '$166,559'},
+{'Distributor': 'Janus Films','Error': 'Invalid API key!','Gross': '$126,504','Rank': '48','Release': 'Seven Samurai70th Anniversary 4K Re-Release','Release Date': 'Jul 5','Response': 'False','Theaters': '21','Total Gross': '$463,287'},
+{'Distributor': 'Sony Pictures Releasing','Error': 'Invalid API key!','Gross': '$124,032','Rank': '49','Release': 'The Garfield Movie','Release Date': 'May 24','Response': 'False','Theaters': '4,108','Total Gross': '$91,956,547'},
+{'Distributor': 'Angel Studios','Error': 'Invalid API key!','Gross': '$108,068','Rank': '50','Release': 'Sound of Hope: The Story of Possum Trot','Release Date': 'Jul 4','Response': 'False','Theaters': '2,200','Total Gross': '$11,636,149'},
+{'Distributor': 'Rialto Distribution','Error': 'Invalid API key!','Gross': '$100,215','Rank': '51','Release': 'The Conversation2024 Re-release (50th Anniversary)','Release Date': 'Aug 9','Response': 'False','Theaters': '16','Total Gross': '$150,942'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$81,063','Rank': '52','Release': 'Oddity','Release Date': 'Jul 19','Response': 'False','Theaters': '790','Total Gross': '$1,200,477'},
+{'Distributor': 'Submarine Deluxe','Error': 'Invalid API key!','Gross': '$74,735','Rank': '53','Release': 'War Game','Release Date': 'Aug 2','Response': 'False','Theaters': '13','Total Gross': '$111,088'},
+{'Distributor': 'GKIDS','Error': 'Invalid API key!','Gross': '$67,498','Rank': '54','Release': 'Sirocco and the Kingdom of the Winds','Release Date': 'Aug 9','Response': 'False','Theaters': '92','Total Gross': '$67,498'},
+{'Distributor': 'Rialto Pictures','Error': 'Invalid API key!','Gross': '$66,534','Rank': '55','Release': 'Army of Shadows4K restoration','Release Date': 'Aug 2','Response': 'False','Theaters': '6','Total Gross': '$80,991'},
+{'Distributor': 'National Geographic Documentary Films','Error': 'Invalid API key!','Gross': '$65,169','Rank': '56','Release': 'Sugarcane','Release Date': 'Aug 9','Response': 'False','Theaters': '21','Total Gross': '$100,794'},
+{'Distributor': 'Greenwich Entertainment','Error': 'Invalid API key!','Gross': '$63,394','Rank': '57','Release': 'Close to You','Release Date': 'Aug 16','Response': 'False','Theaters': '121','Total Gross': '$68,389'},
+{'Distributor': 'Crunchyroll','Error': 'Invalid API key!','Gross': '$60,710','Rank': '58','Release': 'LiSA LiVE is SMiLE ALWAYS -LANDER-','Release Date': 'Aug 17','Response': 'False','Theaters': '301','Total Gross': '$60,710'},
+{'Distributor': 'A24','Error': 'Invalid API key!','Gross': '$57,480','Rank': '59','Release': 'Janet Planet','Release Date': 'Jun 21','Response': 'False','Theaters': '315','Total Gross': '$793,638'},
+{'Distributor': 'Warner Bros.','Error': 'Invalid API key!','Gross': '$51,568','Rank': '60','Release': 'Horizon: An American Saga - Chapter 1','Release Date': 'Jun 28','Response': 'False','Theaters': '3,334','Total Gross': '$29,035,702'},
+{'Distributor': 'Sony Pictures Classics','Error': 'Invalid API key!','Gross': '$47,109','Rank': '61','Release': 'Daddio','Release Date': 'Jun 28','Response': 'False','Theaters': '628','Total Gross': '$976,488'},
+{'Distributor': 'Fathom Events','Error': 'Invalid API key!','Gross': '$43,756','Rank': '62','Release': 'The Good Half','Release Date': 'Jul 23','Response': 'False','Theaters': '53','Total Gross': '$151,894'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$40,412','Rank': '63','Release': 'Sebastian','Release Date': 'Aug 2','Response': 'False','Theaters': '6','Total Gross': '$59,778'},
+{'Distributor': 'Hannover House','Error': 'Invalid API key!','Gross': '$38,254','Rank': '64','Release': 'Dark Feathers: Dance of the Geisha','Release Date': 'Aug 2','Response': 'False','Theaters': '8','Total Gross': '$38,254'},
+{'Distributor': 'Drafthouse Films','Error': 'Invalid API key!','Gross': '$30,815','Rank': '65','Release': 'Caligula: The Ultimate Cut','Release Date': 'Aug 16','Response': 'False','Theaters': '13','Total Gross': '$76,031'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$29,719','Rank': '66','Release': 'Robot Dreams','Release Date': 'May 31','Response': 'False','Theaters': '300','Total Gross': '$875,215'},
+{'Distributor': 'Music Box Films','Error': 'Invalid API key!','Gross': '$27,684','Rank': '67','Release': 'Mountains','Release Date': 'Aug 16','Response': 'False','Theaters': '12','Total Gross': '$44,831'},
+{'Distributor': 'Sideshow Releasing','Error': 'Invalid API key!','Gross': '$26,264','Rank': '68','Release': 'Last Summer','Release Date': 'Jun 28','Response': 'False','Theaters': '24','Total Gross': '$174,977'},
+{'Distributor': 'MUBI','Error': 'Invalid API key!','Gross': '$25,169','Rank': '69','Release': 'Crossing','Release Date': 'Jul 19','Response': 'False','Theaters': '19','Total Gross': '$74,604'},
+{'Distributor': 'Magnolia Pictures','Error': 'Invalid API key!','Gross': '$24,914','Rank': '70','Release': 'Dance First','Release Date': 'Aug 9','Response': 'False','Theaters': '31','Total Gross': '$24,914'},
+{'Distributor': 'Janus Films','Error': 'Invalid API key!','Gross': '$23,726','Rank': '71','Release': 'Time Masters','Release Date': 'Jul 26','Response': 'False','Theaters': '6','Total Gross': '$43,686'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$22,005','Rank': '72','Release': 'How to Come Alive with Norman Mailer','Release Date': 'Jun 28','Response': 'False','Theaters': '8','Total Gross': '$66,974'},
+{'Distributor': 'LD Entertainment','Error': 'Invalid API key!','Gross': '$21,558','Rank': '73','Release': 'National Anthem','Release Date': 'Jul 12','Response': 'False','Theaters': '191','Total Gross': '$268,183'},
+{'Distributor': 'IFC Films','Error': 'Invalid API key!','Gross': '$19,365','Rank': '74','Release': 'Ghostlight','Release Date': 'Jun 14','Response': 'False','Theaters': '502','Total Gross': '$697,229'},
+{'Distributor': 'SRH','Error': 'Invalid API key!','Gross': '$18,170','Rank': '75','Release': 'Hundreds of Beavers','Release Date': 'Jan 26','Response': 'False','Theaters': '33','Total Gross': '$490,158'},
+{'Distributor': 'Purdie Distribution','Error': 'Invalid API key!','Gross': '$17,010','Rank': '76','Release': 'Tokyo Cowboy','Release Date': 'Aug 30','Response': 'False','Theaters': '25','Total Gross': '$125,185'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$16,572','Rank': '77','Release': 'La Chimera','Release Date': 'Mar 29','Response': 'False','Theaters': '216','Total Gross': '$1,004,503'},
+{'Distributor': 'Shout! Factory','Error': 'Invalid API key!','Gross': '$12,963','Rank': '78','Release': 'The Wasp','Release Date': 'Aug 30','Response': 'False','Theaters': '98','Total Gross': '$36,878'},
+{'Distributor': 'Blue Harbor Entertainment','Error': 'Invalid API key!','Gross': '$12,576','Rank': '79','Release': 'Know Your Place','Release Date': 'May 30','Response': 'False','Theaters': '2','Total Gross': '$32,554'},
+{'Distributor': 'Film Movement','Error': 'Invalid API key!','Gross': '$12,089','Rank': '80','Release': 'Close Your Eyes','Release Date': 'Aug 23','Response': 'False','Theaters': '18','Total Gross': '$79,017'},
+{'Distributor': 'Focus Features','Error': 'Invalid API key!','Gross': '$10,895','Rank': '81','Release': 'The Bikeriders','Release Date': 'Jun 21','Response': 'False','Theaters': '2,692','Total Gross': '$21,714,630'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$10,861','Rank': '82','Release': 'Green Border','Release Date': 'Jun 21','Response': 'False','Theaters': '18','Total Gross': '$91,987'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$9,446','Rank': '83','Release': 'Escape','Release Date': 'Jul 5','Response': 'False','Theaters': '54','Total Gross': '$259,242'},
+{'Distributor': 'Janus Films','Error': 'Invalid API key!','Gross': '$9,290','Rank': '84','Release': 'Paris, Texas2024 Re-release','Release Date': 'Aug 30','Response': 'False','Theaters': '13','Total Gross': '$177,508'},
+{'Distributor': 'Film Movement','Error': 'Invalid API key!','Gross': '$7,428','Rank': '85','Release': 'Red Island','Release Date': 'Aug 16','Response': 'False','Theaters': '2','Total Gross': '$9,570'},
+{'Distributor': 'Susan Tuckett Media','Error': 'Invalid API key!','Gross': '$7,002','Rank': '86','Release': 'Escape from Germany','Release Date': 'Apr 12','Response': 'False','Theaters': '131','Total Gross': '$2,616,475'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$6,840','Rank': '87','Release': 'Make Me Famous','Release Date': 'Jun 22','Response': 'False','Theaters': '3','Total Gross': '$65,366'},
+{'Distributor': 'Neon','Error': 'Invalid API key!','Gross': '$6,762','Rank': '88','Release': 'Seeking Mavis Beacon','Release Date': 'Aug 30','Response': 'False','Theaters': '30','Total Gross': '$52,897'},
+{'Distributor': 'Focus Features','Error': 'Invalid API key!','Gross': '$6,285','Rank': '89','Release': 'Touch','Release Date': 'Jul 12','Response': 'False','Theaters': '326','Total Gross': '$1,102,600'},
+{'Distributor': 'Janus Films','Error': 'Invalid API key!','Gross': '$5,822','Rank': '90','Release': 'Evil Does Not Exist','Release Date': 'May 3','Response': 'False','Theaters': '138','Total Gross': '$831,685'},
+{'Distributor': 'Oscilloscope','Error': 'Invalid API key!','Gross': '$5,793','Rank': '91','Release': 'The Vourdalak','Release Date': 'Jun 28','Response': 'False','Theaters': '8','Total Gross': '$46,937'},
+{'Distributor': 'Searchlight Pictures','Error': 'Invalid API key!','Gross': '$5,402','Rank': '92','Release': 'Kinds of Kindness','Release Date': 'Jun 21','Response': 'False','Theaters': '920','Total Gross': '$5,038,931'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$5,152','Rank': '93','Release': 'Water Brother','Release Date': 'Jul 11','Response': 'False','Theaters': '1','Total Gross': '$48,705'},
+{'Distributor': 'Music Box Films','Error': 'Invalid API key!','Gross': '$5,089','Rank': '94','Release': 'The Nature of Love','Release Date': 'Jul 5','Response': 'False','Theaters': '4','Total Gross': '$22,063'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$4,109','Rank': '95','Release': 'Nostalghia2024 Re-release','Release Date': 'Feb 21','Response': 'False','Theaters': '11','Total Gross': '$260,794'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$3,609','Rank': '96','Release': 'Taking Venice','Release Date': 'May 17','Response': 'False','Theaters': '9','Total Gross': '$65,334'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$3,265','Rank': '97','Release': 'Banel & Adama','Release Date': 'Jun 7','Response': 'False','Theaters': '7','Total Gross': '$49,503'},
+{'Distributor': 'Music Box Films','Error': 'Invalid API key!','Gross': '$2,995','Rank': '98','Release': 'Crumb Catcher','Release Date': 'Jul 19','Response': 'False','Theaters': '55','Total Gross': '$39,362'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$2,923','Rank': '99','Release': 'Naked Acts','Release Date': 'Jun 14','Response': 'False','Theaters': '3','Total Gross': '$20,219'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$2,756','Rank': '100','Release': 'Out Come the Wolves','Release Date': 'Aug 30','Response': 'False','Theaters': '16','Total Gross': '$9,649'},
+{'Distributor': 'Janus Films','Error': 'Invalid API key!','Gross': '$2,674','Rank': '101','Release': 'Stranger and the Fog','Release Date': 'Aug 30','Response': 'False','Theaters': '2','Total Gross': '$11,125'},
+{'Distributor': 'Roadside Attractions','Error': 'Invalid API key!','Gross': '$2,200','Rank': '102','Release': 'Firebrand','Release Date': 'Jun 14','Response': 'False','Theaters': '442','Total Gross': '$521,366'},
+{'Distributor': 'Indican Pictures','Error': 'Invalid API key!','Gross': '$1,961','Rank': '103','Release': 'Scream Therapy','Release Date': 'Jul 19','Response': 'False','Theaters': '2','Total Gross': '$10,159'},
+{'Distributor': 'Music Box Films','Error': 'Invalid API key!','Gross': '$1,889','Rank': '104','Release': 'The Crime Is Mine','Release Date': 'Dec 25','Response': 'False','Theaters': '19','Total Gross': '$122,083'},
+{'Distributor': 'Film Movement','Error': 'Invalid API key!','Gross': '$1,826','Rank': '105','Release': 'Mapantsula2024 Re-release','Release Date': 'Jul 26','Response': 'False','Theaters': '1','Total Gross': '$6,698'},
+{'Distributor': 'Well Go USA Entertainment','Error': 'Invalid API key!','Gross': '$1,727','Rank': '106','Release': 'Revolver','Release Date': 'Aug 23','Response': 'False','Theaters': '1','Total Gross': '$4,137'},
+{'Distributor': 'Entertainment Squad','Error': 'Invalid API key!','Gross': '$1,630','Rank': '107','Release': 'Midas','Release Date': 'Jun 24','Response': 'False','Theaters': '22','Total Gross': '$28,790'},
+{'Distributor': 'Angel Studios','Error': 'Invalid API key!','Gross': '$1,341','Rank': '108','Release': 'Sight','Release Date': 'May 24','Response': 'False','Theaters': '2,118','Total Gross': '$7,206,741'},
+{'Distributor': 'Roadside Attractions','Error': 'Invalid API key!','Gross': '$1,332','Rank': '109','Release': 'Summer Camp','Release Date': 'May 31','Response': 'False','Theaters': '1,787','Total Gross': '$2,403,638'},
+{'Distributor': 'Magnolia Pictures','Error': 'Invalid API key!','Gross': '$895','Rank': '110','Release': 'The Arctic Convoy','Release Date': 'Jul 26','Response': 'False','Theaters': '6','Total Gross': '$2,869'},
+{'Distributor': 'Oscilloscope','Error': 'Invalid API key!','Gross': '$816','Rank': '111','Release': 'Flipside','Release Date': 'May 31','Response': 'False','Theaters': '13','Total Gross': '$51,940'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$626','Rank': '112','Release': 'The Falling Star','Release Date': 'Aug 30','Response': 'False','Theaters': '6','Total Gross': '$8,234'},
+{'Distributor': 'Indican Pictures','Error': 'Invalid API key!','Gross': '$522','Rank': '113','Release': 'Valleyheart','Release Date': 'Jul 19','Response': 'False','Theaters': '2','Total Gross': '$5,250'},
+{'Distributor': '-','Error': 'Invalid API key!','Gross': '$459','Rank': '114','Release': 'The Last Breath','Release Date': 'Jul 26','Response': 'False','Theaters': '16','Total Gross': '$3,214'},
+{'Distributor': 'Sony Pictures Releasing','Error': 'Invalid API key!','Gross': '$321','Rank': '115','Release': 'Hijack 1971','Release Date': 'Jul 5','Response': 'False','Theaters': '62','Total Gross': '$242,069'},
+{'Distributor': 'Indican Pictures','Error': 'Invalid API key!','Gross': '$308','Rank': '116','Release': 'Petrol','Release Date': 'Aug 30','Response': 'False','Theaters': '2','Total Gross': '$5,090'},
+{'Distributor': 'Sony Pictures Releasing','Error': 'Invalid API key!','Gross': '$141','Rank': '117','Release': 'Wicked Little Letters','Release Date': 'Mar 29','Response': 'False','Theaters': '1,009','Total Gross': '$5,008,179'},
+{'Distributor': 'Roadside Attractions','Error': 'Invalid API key!','Gross': '$106','Rank': '118','Release': 'Kill','Release Date': 'Jul 4','Response': 'False','Theaters': '828','Total Gross': '$1,171,487'},
+{'Distributor': 'Music Box Films','Error': 'Invalid API key!','Gross': '$95','Rank': '119','Release': 'Limbo','Release Date': 'Mar 22','Response': 'False','Theaters': '12','Total Gross': '$45,272'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$85','Rank': '120','Release': 'The Old Oak','Release Date': 'Apr 5','Response': 'False','Theaters': '37','Total Gross': '$229,763'},
+{'Distributor': 'Magnolia Pictures','Error': 'Invalid API key!','Gross': '$74','Rank': '121','Release': 'The Convert','Release Date': 'Jul 12','Response': 'False','Theaters': '20','Total Gross': '$5,491'},
+{'Distributor': 'Kino Lorber','Error': 'Invalid API key!','Gross': '$47','Rank': '122','Release': 'Remembering Gene Wilder','Release Date': 'Mar 15','Response': 'False','Theaters': '40','Total Gross': '$165,708'}]
+
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
