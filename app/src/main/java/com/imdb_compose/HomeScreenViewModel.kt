@@ -48,13 +48,13 @@ class HomeScreenViewModel() : ViewModel() {
     val peopleApi = Retrofit.getInstance().create(PeopleApi::class.java)
 
     val catagories: List<String> = listOf(
+        "Trending tv",
+        "Tv airing today",
         "Upcoming movies",
         "Popular actors",
         "Trending people",
-        "Trending tv",
         "Trending movies",
         "Top box office",
-        "Tv airing today",
         "Movies of the week",
     )
     .shuffled()
@@ -210,6 +210,151 @@ class HomeScreenViewModel() : ViewModel() {
      *       "name": "Match of the Day",
      *       "vote_average": 7.375,
      *       "vote_count": 40
+     * }
+     */
+
+    private val _tvDetails: MutableStateFlow<TvDetails?> = MutableStateFlow(null)
+    val tvDetails: StateFlow<TvDetails?> = _tvDetails.asStateFlow()
+    /**
+     * {
+     *     "adult": false,
+     *     "backdrop_path": "/jWXrQstj7p3Wl5MfYWY6IHqRpDb.jpg",
+     *     "created_by": [],
+     *     "episode_run_time": [
+     *         15
+     *     ],
+     *     "first_air_date": "1952-12-26",
+     *     "genres": [
+     *         {
+     *             "id": 10763,
+     *             "name": "News"
+     *         }
+     *     ],
+     *     "homepage": "https://www.tagesschau.de/",
+     *     "id": 94722,
+     *     "in_production": true,
+     *     "languages": [
+     *         "de"
+     *     ],
+     *     "last_air_date": "2024-10-19",
+     *     "last_episode_to_air": {
+     *         "id": 5627342,
+     *         "name": "Episode 308",
+     *         "overview": "",
+     *         "vote_average": 0,
+     *         "vote_count": 0,
+     *         "air_date": "2024-11-03",
+     *         "episode_number": 308,
+     *         "episode_type": "standard",
+     *         "production_code": "",
+     *         "runtime": null,
+     *         "season_number": 73,
+     *         "show_id": 94722,
+     *         "still_path": null
+     *     },
+     *     "name": "Tagesschau",
+     *     "next_episode_to_air": {
+     *         "id": 5627343,
+     *         "name": "Episode 309",
+     *         "overview": "",
+     *         "vote_average": 0,
+     *         "vote_count": 0,
+     *         "air_date": "2024-11-04",
+     *         "episode_number": 309,
+     *         "episode_type": "standard",
+     *         "production_code": "",
+     *         "runtime": null,
+     *         "season_number": 73,
+     *         "show_id": 94722,
+     *         "still_path": null
+     *     },
+     *     "networks": [
+     *         {
+     *             "id": 308,
+     *             "logo_path": "/nGl2dDGonksWY4fTzPPdkK3oNyq.png",
+     *             "name": "Das Erste",
+     *             "origin_country": "DE"
+     *         }
+     *     ],
+     *     "number_of_episodes": 21205,
+     *     "number_of_seasons": 73,
+     *     "origin_country": [
+     *         "DE"
+     *     ],
+     *     "original_language": "de",
+     *     "original_name": "Tagesschau",
+     *     "overview": "German daily news program, the oldest still existing program on German television.",
+     *     "popularity": 2554.283,
+     *     "poster_path": "/7dFZJ2ZJJdcmkp05B9NWlqTJ5tq.jpg",
+     *     "production_companies": [
+     *         {
+     *             "id": 7201,
+     *             "logo_path": "/ljV8ZT3CIYCEIEDlTyBliXJVCZr.png",
+     *             "name": "NDR",
+     *             "origin_country": "DE"
+     *         }
+     *     ],
+     *     "production_countries": [
+     *         {
+     *             "iso_3166_1": "DE",
+     *             "name": "Germany"
+     *         }
+     *     ],
+     *     "seasons": [
+     *         {
+     *             "air_date": "1952-12-26",
+     *             "episode_count": 6,
+     *             "id": 134441,
+     *             "name": "Season 1952",
+     *             "overview": "",
+     *             "poster_path": "/lEOhLYxSlqYcAlSSunb0fbXkKM5.jpg",
+     *             "season_number": 1,
+     *             "vote_average": 3.5
+     *         }
+     *     ],
+     *     "spoken_languages": [
+     *         {
+     *             "english_name": "German",
+     *             "iso_639_1": "de",
+     *             "name": "Deutsch"
+     *         }
+     *     ],
+     *     "status": "Returning Series",
+     *     "tagline": "",
+     *     "type": "News",
+     *     "vote_average": 6.726,
+     *     "vote_count": 206
+     * }
+     */
+
+    private val _tvImages: MutableStateFlow<Images?> = MutableStateFlow(null)
+    val tvImages: StateFlow<Images?> = _tvImages.asStateFlow()
+    /**
+     * {
+     *   "backdrops": [
+     *     {
+     *       "aspect_ratio": 1.778,
+     *       "height": 1080,
+     *       "iso_639_1": null,
+     *       "file_path": "/kvQE5pvZZWCIQ0uAQvzRmQO3nZM.jpg",
+     *       "vote_average": 5.312,
+     *       "vote_count": 1,
+     *       "width": 1920
+     *     }
+     *   ],
+     *   "id": 231344,
+     *   "logos": [],
+     *   "posters": [
+     *     {
+     *       "aspect_ratio": 0.666,
+     *       "height": 1763,
+     *       "iso_639_1": null,
+     *       "file_path": "/5u4lYLk0kDf6XTUIENhXkaUV2jQ.jpg",
+     *       "vote_average": 0,
+     *       "vote_count": 0,
+     *       "width": 1175
+     *     }
+     *   ]
      * }
      */
 
@@ -413,8 +558,8 @@ class HomeScreenViewModel() : ViewModel() {
      * }
      */
 
-    private val _movieImages: MutableStateFlow<MovieImages?> = MutableStateFlow(null)
-    val movieImages: StateFlow<MovieImages?> = _movieImages.asStateFlow()
+    private val _movieImages: MutableStateFlow<Images?> = MutableStateFlow(null)
+    val movieImages: StateFlow<Images?> = _movieImages.asStateFlow()
     /**
      * {
      *     "id": 933260,
@@ -491,13 +636,6 @@ class HomeScreenViewModel() : ViewModel() {
         }
     }
 
-    suspend fun getPersonDetails(id: Int) {
-        viewModelScope.launch {
-            val result = peopleApi.getPersonDetails(id)
-            _personDetails.value = result
-        }
-    }
-
     suspend fun getMovieDetails(id: Int) {
         viewModelScope.launch {
             val result = movieApi.getMovieDetails(id)
@@ -509,6 +647,27 @@ class HomeScreenViewModel() : ViewModel() {
         viewModelScope.launch {
             val result = movieApi.getMovieImages(id)
             _movieImages.value = result
+        }
+    }
+
+    suspend fun getPersonDetails(id: Int) {
+        viewModelScope.launch {
+            val result = peopleApi.getPersonDetails(id)
+            _personDetails.value = result
+        }
+    }
+
+    suspend fun getTvSeriesDetails(id: Int) {
+        viewModelScope.launch {
+            val result = tvApi.getTvSeriesDetails(id)
+            _tvDetails.value = result
+        }
+    }
+
+    suspend fun getTvSeriesImages(id: Int) {
+        viewModelScope.launch {
+            val result = tvApi.getTvSeriesImages(id)
+            _tvImages.value = result
         }
     }
 }
@@ -527,22 +686,6 @@ data class TvResult(
     val popularity: String,
     val vote_average: String,
     val first_air_date: String
-)
-
-data class MovieList(
-    val results: List<MovieResult>
-)
-
-data class MovieResult(
-    val id: Int,
-    val title: String,
-    val original_title: String,
-    val overview: String,
-    val backdrop_path: String,
-    val poster_path: String,
-    val popularity: String,
-    val vote_average: String,
-    val release_date: String
 )
 
 data class ActorList(
@@ -570,6 +713,22 @@ data class ActorDetail(
     val profile_path: String,
     val popularity: String,
     val known_for_department: String
+)
+
+data class MovieList(
+    val results: List<MovieResult>
+)
+
+data class MovieResult(
+    val id: Int,
+    val title: String,
+    val original_title: String,
+    val overview: String,
+    val backdrop_path: String,
+    val poster_path: String,
+    val popularity: String,
+    val vote_average: String,
+    val release_date: String
 )
 
 data class MovieDetail(
@@ -606,14 +765,14 @@ data class MovieCollection(
     val backdrop_path: String
 )
 
-data class MovieImages(
+data class Images(
     val id: Int,
-    val backdrops: List<MovieImageResult>,
-    val posters: List<MovieImageResult>,
-    val logos: List<MovieImageResult>
+    val backdrops: List<ImageResult>,
+    val posters: List<ImageResult>,
+    val logos: List<ImageResult>
 )
 
-data class MovieImageResult(
+data class ImageResult(
     val aspect_ratio: Float,
     val height: Int,
     val file_path: String,
@@ -621,3 +780,87 @@ data class MovieImageResult(
     val vote_count: Int,
     val width: Int
 )
+
+data class TvDetails(
+    val id: Int,
+    val name: String,
+    val adult: Boolean,
+    val backdrop_path: String,
+    val created_by: List<Any>,
+    val first_air_date: String,
+    val last_air_date: String,
+    val genres: List<Genre>,
+    val in_production: String,
+    val languages: List<String>,
+    val last_episode_to_air: EpisodeToAir,
+    val next_episode_to_air: EpisodeToAir,
+    val networks: List<Network>,
+    val number_of_episodes: Int,
+    val number_of_seasons: Int,
+    val origin_country: List<String>,
+    val original_language: String,
+    val original_name: String,
+    val overview: String,
+    val popularity: Float,
+    val poster_path: String,
+    val production_companies: List<ProductionCompany>,
+    val production_countries: List<Countries>,
+    val seasons: List<Season>,
+    val spoken_languages: List<Language>,
+    val status: String,
+    val tagline: String,
+    val type: String,
+    val vote_average: Float,
+    val vote_count: Int
+)
+
+data class EpisodeToAir(
+    val id: Int,
+    val name: String,
+    val overview: String,
+    val vote_average: Float,
+    val vote_count: Int,
+    val air_date: String,
+    val episode_number: Int,
+    val episode_type: String,
+    val production_code: String,
+    val runtime: Int,
+    val season_number: Int,
+    val show_id: Int,
+    val still_path: String
+)
+
+data class Network(
+    val id: Int,
+    val logo_path: String,
+    val name: String,
+    val origin_country: String
+)
+
+data class ProductionCompany(
+    val id: Int,
+    val logo_path: String,
+    val name: String,
+    val origin_country: String
+)
+
+data class Countries(
+    val name: String
+)
+
+data class Season(
+    val air_date: String,
+    val episode_count: Int,
+    val id: Int,
+    val name: String,
+    val overview: String,
+    val poster_path: String,
+    val season_number: Int,
+    val vote_average: Float
+)
+
+data class Language(
+    val english_name: String,
+    val name: String
+)
+

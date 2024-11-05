@@ -63,7 +63,7 @@ interface MovieApi {
     suspend fun getMovieDetails(@Path("id") id: Int): MovieDetail
 
     @GET("3/movie/{id}/images?api_key=${ BuildConfig.API_KEY }")
-    suspend fun getMovieImages(@Path("id") id: Int): MovieImages
+    suspend fun getMovieImages(@Path("id") id: Int): Images
 }
 
 interface TvApi {
@@ -73,8 +73,14 @@ interface TvApi {
     @GET("${ AIRING_TODAY_TV_PATH }?language=en-US&api_key=${ BuildConfig.API_KEY }")
     suspend fun getAiringTodayTv(): TvList
 
-    @GET("3/tv/{series_id}/images/{img_path}")
-    suspend fun getTvImg(@Path("series_id") id: Int, @Path("img_path") imgPath: String): ImageResults
+    @GET("3/tv/{id}/images/{img_path}?api_key=${ BuildConfig.API_KEY }")
+    suspend fun getTvImg(@Path("id") id: Int, @Path("img_path") imgPath: String): ImageResults
+
+    @GET("/3/tv/{id}?api_key=${ BuildConfig.API_KEY }")
+    suspend fun getTvSeriesDetails(@Path("id") id: Int): TvDetails
+
+    @GET("/3/tv/{id}/images?api_key=${ BuildConfig.API_KEY }")
+    suspend fun getTvSeriesImages(@Path("id") id: Int): Images
 }
 
 interface PeopleApi {

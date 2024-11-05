@@ -30,6 +30,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -45,6 +47,7 @@ import androidx.compose.material.icons.outlined.BookOnline
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -57,6 +60,8 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.carousel.HorizontalMultiBrowseCarousel
+import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -73,6 +78,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Paint
@@ -82,6 +88,8 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -93,6 +101,7 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
+import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -114,7 +123,7 @@ interface Navigator {
     @Serializable
     data class PersonDetailsPage(val person: String, val id: Int): Navigator
     @Serializable
-    data class TvDetailsPage(val show: String): Navigator
+    data class TvDetailsPage(val show: String, val id: Int): Navigator
 }
 
 class MainActivity : ComponentActivity() {
@@ -149,7 +158,7 @@ class MainActivity : ComponentActivity() {
                         }
                         composable<Navigator.TvDetailsPage> {
                             val args =  it.toRoute<Navigator.TvDetailsPage>()
-                            TvDetailsPage(args.show, viewModel = viewModel, navController = navController, { navController.popBackStack() })
+                            TvDetailsPage(args.show, args.id, viewModel = viewModel, navController = navController, { navController.popBackStack() })
                         }
                     }
                 }
@@ -399,10 +408,10 @@ fun LazyRows(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     when(catagory) {
-                        "Top box office" -> BoxOfficeBox(catagory, viewModel.boxOffice, navController)
-                        "Upcoming movies" -> UpcommingBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
                         "Tv airing today" -> TvBox(catagory, viewModel.airingTodayTv.collectAsState(), navController)
                         "Trending tv" -> TvBox(catagory, viewModel.trendingTv.collectAsState(), navController)
+                        "Top box office" -> BoxOfficeBox(catagory, viewModel.boxOffice, navController)
+                        "Upcoming movies" -> UpcommingBox(catagory, viewModel.upcomingMovies.collectAsState(), viewModel, navController)
                         "Popular actors" -> PersonBox(catagory, viewModel.popularPersons.collectAsState(), navController)
                         "Trending people" -> PersonBox(catagory, viewModel.trendingPersons.collectAsState(), navController)
                         "Movies of the week" -> MovieBox(catagory, viewModel.movieListOfWeek.collectAsState(), viewModel, navController)
@@ -761,7 +770,7 @@ fun PosterBoxA(
                         navController.navigate(Navigator.MovieDetailsPage(title = movie.title, id = movie.id))
                     }
                     if (show != null) {
-                        navController.navigate(Navigator.TvDetailsPage(show.name))
+                        navController.navigate(Navigator.TvDetailsPage(show = show.name, id = show.id))
                     }
                 },
             contentAlignment = Alignment.TopStart
@@ -1060,6 +1069,121 @@ fun ImageAsync(
         contentDescription = contentDescription,
         loading = { isLoading() }
     )
+}
+
+@Composable
+fun Tags(txt: String) {
+    Box(
+        modifier = Modifier
+            .shadow(
+                color = gray600,
+                offsetX = 0.dp,
+                offsetY = 0.dp,
+                blurRadius = 2.dp,
+                blurRadiusFilter = "NORMAL"
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .shadow(
+                    color = gray300,
+                    offsetX = 0.dp,
+                    offsetY = 0.dp,
+                    blurRadius = 2.dp,
+                    blurRadiusFilter = "INNER"
+                )
+        ) {
+            Text(
+                modifier = Modifier.padding(all = 8.dp),
+                text = txt,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+fun Pager(images: State<Images?>) {
+    val pagerState = rememberPagerState { images.value?.backdrops?.size!! }
+
+    Row (modifier = Modifier
+        .fillMaxWidth()
+        .padding(bottom = 16.dp)) {
+        Column {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxWidth()
+            ) { i ->
+                Card(modifier = Modifier.fillMaxWidth()) {
+                    ImageAsync(
+                        backDropPath = when (i) {
+                            0 -> images.value?.backdrops!![0].file_path
+                            1 -> images.value?.backdrops!![1].file_path
+                            2 -> images.value?.backdrops!![2].file_path
+                            3 -> images.value?.backdrops!![3].file_path
+                            else -> images.value?.backdrops!![4].file_path
+                        },
+                        aspectRatio = when (i) {
+                            0 -> images.value?.backdrops!![0].aspect_ratio
+                            1 -> images.value?.backdrops!![1].aspect_ratio
+                            2 -> images.value?.backdrops!![2].aspect_ratio
+                            3 -> images.value?.backdrops!![3].aspect_ratio
+                            else -> images.value?.backdrops!![4].aspect_ratio
+                        },
+                        contentDescription = ""
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Carosuel(images: State<Images?>) {
+    var rowSize by remember {
+        mutableStateOf(Size.Zero)
+    }
+    val state = rememberCarouselState { 5 }
+
+    Row (
+        modifier = Modifier
+            .height(400.dp)
+            .fillMaxWidth()
+            .onGloballyPositioned { layoutCoordinates ->
+                rowSize = layoutCoordinates.size.toSize()
+            }
+    ) {
+        val width = LocalDensity.current.run { rowSize.width.toDp() }
+
+        Column {
+            HorizontalMultiBrowseCarousel(
+                state = state,
+                preferredItemWidth = width,
+                itemSpacing = 0.dp
+            ) {i ->
+                Box(modifier = Modifier.fillMaxSize()) {
+                    ImageAsync(
+                        backDropPath = when (i) {
+                            0 -> images.value?.backdrops!![0].file_path
+                            1 -> images.value?.backdrops!![1].file_path
+                            2 -> images.value?.backdrops!![2].file_path
+                            3 -> images.value?.backdrops!![3].file_path
+                            else -> images.value?.backdrops!![4].file_path
+                        },
+                        aspectRatio = when (i) {
+                            0 -> images.value?.backdrops!![0].aspect_ratio
+                            1 -> images.value?.backdrops!![1].aspect_ratio
+                            2 -> images.value?.backdrops!![2].aspect_ratio
+                            3 -> images.value?.backdrops!![3].aspect_ratio
+                            else -> images.value?.backdrops!![4].aspect_ratio
+                        },
+                        contentDescription = ""
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
