@@ -82,6 +82,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -102,6 +103,7 @@ import com.imdb_compose.ui.PersonDetailsPage
 import com.imdb_compose.ui.TvDetailsPage
 import com.imdb_compose.ui.TvList
 import com.imdb_compose.ui.TvResult
+import dagger.hilt.android.AndroidEntryPoint
 //import com.imdb_compose.ui.theme.Imdb_composeTheme
 import kotlinx.serialization.Serializable
 
@@ -118,6 +120,7 @@ interface Navigator {
     data class TvDetailsPage(val show: String, val id: Int): Navigator
 }
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,7 +133,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.secondary
                 ) {
                     val navController = rememberNavController()
-                    val viewModel = HomeScreenViewModel()
+                    val viewModel: HomeScreenViewModel = hiltViewModel()
 
                     NavHost(navController = navController, startDestination = Navigator.HomeScreen ) {
                         composable<Navigator.HomeScreen> {

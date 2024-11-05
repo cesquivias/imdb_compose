@@ -45,17 +45,6 @@ object Retrofit {
 
     const val IMAGE_PATH =  "t/p/original/"
     const val IMAGE_PATH_w500 = "t/p/w500/"
-
-    fun getInstance(): Retrofit {
-        val client = OkHttpClient()
-        val interceptor = HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)
-        val clientBuilder: OkHttpClient.Builder = client.newBuilder().addInterceptor(interceptor)
-
-        return Retrofit.Builder().baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .client(clientBuilder.build())
-            .build()
-    }
 }
 
 interface MovieApi {

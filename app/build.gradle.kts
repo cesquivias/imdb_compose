@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrainsKotlinSerialization)
     alias(libs.plugins.compose.compiler)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -101,4 +103,12 @@ dependencies {
     implementation(libs.logging.interceptor)
 
     implementation(libs.coil.compose)
+
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+}
+
+kapt {
+    correctErrorTypes = true
 }

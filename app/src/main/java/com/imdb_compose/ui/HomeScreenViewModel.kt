@@ -6,10 +6,12 @@ import com.imdb_compose.domain.MovieApi
 import com.imdb_compose.domain.PeopleApi
 import com.imdb_compose.domain.Retrofit
 import com.imdb_compose.domain.TvApi
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 /**
  * people
@@ -40,10 +42,12 @@ import kotlinx.coroutines.launch
  *  top rated
  */
 
-class HomeScreenViewModel() : ViewModel() {
-    val movieApi = Retrofit.getInstance().create(MovieApi::class.java)
-    val tvApi = Retrofit.getInstance().create(TvApi::class.java)
-    val peopleApi = Retrofit.getInstance().create(PeopleApi::class.java)
+@HiltViewModel
+class HomeScreenViewModel @Inject constructor(
+    private val movieApi: MovieApi,
+    private val tvApi: TvApi,
+    private val peopleApi: PeopleApi
+) : ViewModel() {
 
     val catagories: List<String> = listOf(
         "Trending tv",

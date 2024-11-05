@@ -7,9 +7,11 @@ import coil.disk.DiskCache
 import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.util.DebugLogger
+import dagger.hilt.android.HiltAndroidApp
 import okhttp3.Call
 import okhttp3.OkHttpClient
 
+@HiltAndroidApp
 class MyApplication: Application(), ImageLoaderFactory {
     override fun newImageLoader(): ImageLoader {
         val okHttpClient = OkHttpClient.Builder().build()
