@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">imdb_compose</string>
+    <string name="what_to_watch">What to watch</string>
+    <string name="back">back</string>
+    <string name="see_all">See all</string>
+    <string name="search">Search</string>
+    <string name="search_tmdb">Search TMDB</string>
+    <string name="delete_search">Delete Search</string>
 </resources>
